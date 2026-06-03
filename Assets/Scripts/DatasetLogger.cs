@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -19,17 +18,27 @@ public class DatasetLogger : MonoBehaviour
     private string eventsPath;
 
     private bool missionActive;
+
     private string currentMissionId;
     private string currentDestinationName;
-    private int currentObstacleCount;
-    private int currentMissionNumber;
+    private string currentZoneType;
+    private string currentZoneCriticality;
+    private string currentIncidentType;
 
+    private int currentObstacleCount;
     private Vector3 currentDestinationPosition;
 
     private float missionStartTime;
     private float nextLogTime;
     private float batteryPct;
+
     private float anomalyFactor;
+    private float temperatureBoost;
+    private float humidityBoost;
+    private float noiseBoost;
+    private float vibrationBoost;
+
+    private int incidentBaseScore;
 
     private float maxTemperature;
     private float maxHumidity;
@@ -58,13 +67,15 @@ public class DatasetLogger : MonoBehaviour
             return;
         }
 
+        // Exporta los CSV afuera de Assets para que Unity
+        // no intente reimportarlos mientras se modifican.
         dataFolder = Path.GetFullPath(
-    Path.Combine(
-        Application.dataPath,
-        "..",
-        "Exports"
-    )
-);
+            Path.Combine(
+                Application.dataPath,
+                "..",
+                "Exports"
+            )
+        );
 
         Directory.CreateDirectory(dataFolder);
 
@@ -95,7 +106,7 @@ public class DatasetLogger : MonoBehaviour
     {
         PrepararArchivo(
             missionsPath,
-            "mission_id,destination,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count\n"
+            "mission_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level\n"
         );
 
         PrepararArchivo(
@@ -143,11 +154,9 @@ public class DatasetLogger : MonoBehaviour
         currentDestinationName = destinationName;
         currentObstacleCount = obstacleCount;
         currentDestinationPosition = destinationPosition;
-        currentMissionNumber = missionNumber;
 
         missionStartTime = Time.time;
         nextLogTime = Time.time;
-
         batteryPct = initialBatteryPct;
 
         maxTemperature = 0f;
@@ -163,27 +172,27 @@ public class DatasetLogger : MonoBehaviour
         vibrationEventLogged = false;
         batteryEventLogged = false;
 
-        // Cada misión tiene una intensidad diferente.
-        // Así no todas generan exactamente las mismas lecturas.
-        System.Random random =
-            new System.Random(
-                missionNumber * 733
-            );
+        ConfigurarZona();
+        ConfigurarIncidenteOculto(missionNumber);
 
-        anomalyFactor =
-            0.45f +
-            (float) random.NextDouble() * 0.95f;
+        // Hace reproducibles las pequeñas variaciones
+        // ambientales de cada misión.
+        UnityEngine.Random.InitState(
+            missionNumber * 911
+        );
 
         missionActive = true;
 
         RegistrarEvento(
             "mision_iniciada",
             "informativa",
-            obstacleCount
+            currentObstacleCount
         );
 
         Debug.Log(
-            $"{missionId}: comenzó el registro del dataset."
+            $"{currentMissionId}: escenario oculto → " +
+            $"{currentIncidentType}. Zona → " +
+            $"{currentZoneType} ({currentZoneCriticality})."
         );
     }
 
@@ -216,10 +225,36 @@ public class DatasetLogger : MonoBehaviour
         float durationSeconds =
             Time.time - missionStartTime;
 
+        int finalRiskScore =
+            CalcularRiskScore(completed);
+
+        string requiresIntervention =
+            finalRiskScore >= 3
+                ? "yes"
+                : "no";
+
+        string riskLevel;
+
+        if (finalRiskScore <= 1)
+        {
+            riskLevel = "low";
+        }
+        else if (finalRiskScore <= 3)
+        {
+            riskLevel = "medium";
+        }
+        else
+        {
+            riskLevel = "high";
+        }
+
         string line = string.Join(
             ",",
             currentMissionId,
             currentDestinationName,
+            currentZoneType,
+            currentZoneCriticality,
+            currentIncidentType,
             currentObstacleCount.ToString(),
             Formatear(durationSeconds),
             completed ? "yes" : "no",
@@ -229,7 +264,9 @@ public class DatasetLogger : MonoBehaviour
             Formatear(maxHumidity),
             Formatear(maxNoise),
             Formatear(maxVibration),
-            eventCount.ToString()
+            eventCount.ToString(),
+            requiresIntervention,
+            riskLevel
         );
 
         File.AppendAllText(
@@ -240,7 +277,9 @@ public class DatasetLogger : MonoBehaviour
         missionActive = false;
 
         Debug.Log(
-            $"{currentMissionId}: resumen guardado en misiones_robot.csv."
+            $"{currentMissionId}: dataset guardado. " +
+            $"Intervención → {requiresIntervention}. " +
+            $"Riesgo → {riskLevel}."
         );
     }
 
@@ -258,6 +297,195 @@ public class DatasetLogger : MonoBehaviour
             nextLogTime =
                 Time.time +
                 logIntervalSeconds;
+        }
+    }
+
+    private void ConfigurarZona()
+    {
+        switch (currentDestinationName)
+        {
+            case "Sala Red":
+                currentZoneType =
+                    "network";
+
+                currentZoneCriticality =
+                    "medium";
+
+                break;
+
+            case "Sala Energia":
+                currentZoneType =
+                    "electrical";
+
+                currentZoneCriticality =
+                    "high";
+
+                break;
+
+            case "Sala Cooling":
+                currentZoneType =
+                    "cooling";
+
+                currentZoneCriticality =
+                    "high";
+
+                break;
+
+            case "Sala UPS":
+                currentZoneType =
+                    "power_backup";
+
+                currentZoneCriticality =
+                    "high";
+
+                break;
+
+            case "Rack Norte":
+            case "Rack Sur":
+                currentZoneType =
+                    "server_rack";
+
+                currentZoneCriticality =
+                    "medium";
+
+                break;
+
+            default:
+                currentZoneType =
+                    "general";
+
+                currentZoneCriticality =
+                    "low";
+
+                break;
+        }
+    }
+
+    private void ConfigurarIncidenteOculto(
+        int missionNumber
+    )
+    {
+        System.Random random =
+            new System.Random(
+                missionNumber * 733 +
+                currentObstacleCount * 17
+            );
+
+        anomalyFactor =
+            0.45f +
+            (float) random.NextDouble() *
+            0.45f;
+
+        temperatureBoost = 0f;
+        humidityBoost = 0f;
+        noiseBoost = 0f;
+        vibrationBoost = 0f;
+        incidentBaseScore = 0;
+
+        int normalThreshold =
+            currentZoneCriticality == "high"
+                ? 28
+                : 40;
+
+        int roll =
+            random.Next(0, 100);
+
+        if (roll < normalThreshold)
+        {
+            currentIncidentType =
+                "normal_operation";
+
+            return;
+        }
+
+        if (
+            currentObstacleCount >= 4 &&
+            roll % 4 == 0
+        )
+        {
+            currentIncidentType =
+                "access_obstruction";
+
+            incidentBaseScore = 2;
+
+            return;
+        }
+
+        if (roll >= 88)
+        {
+            currentIncidentType =
+                "multiple_anomalies";
+
+            temperatureBoost = 7f;
+            humidityBoost = 8f;
+            noiseBoost = 9f;
+            vibrationBoost = 3.5f;
+
+            incidentBaseScore = 5;
+
+            return;
+        }
+
+        switch (currentZoneType)
+        {
+            case "cooling":
+                currentIncidentType =
+                    "cooling_failure";
+
+                temperatureBoost = 6f;
+                humidityBoost = 10f;
+                noiseBoost = 4f;
+
+                incidentBaseScore = 4;
+
+                break;
+
+            case "electrical":
+            case "power_backup":
+                currentIncidentType =
+                    "electrical_instability";
+
+                temperatureBoost = 4f;
+                noiseBoost = 5f;
+                vibrationBoost = 2.5f;
+
+                incidentBaseScore = 3;
+
+                break;
+
+            case "network":
+                currentIncidentType =
+                    "network_overload";
+
+                temperatureBoost = 3f;
+                noiseBoost = 11f;
+
+                incidentBaseScore = 2;
+
+                break;
+
+            case "server_rack":
+                currentIncidentType =
+                    "rack_overheating";
+
+                temperatureBoost = 7f;
+                noiseBoost = 3f;
+                vibrationBoost = 1f;
+
+                incidentBaseScore = 3;
+
+                break;
+
+            default:
+                currentIncidentType =
+                    "environmental_anomaly";
+
+                temperatureBoost = 4f;
+                humidityBoost = 5f;
+
+                incidentBaseScore = 2;
+
+                break;
         }
     }
 
@@ -288,7 +516,8 @@ public class DatasetLogger : MonoBehaviour
         batteryPct =
             Mathf.Max(
                 0f,
-                batteryPct - batteryDrain
+                batteryPct -
+                batteryDrain
             );
 
         Vector3 planarRobotPosition =
@@ -321,8 +550,11 @@ public class DatasetLogger : MonoBehaviour
         float temperature =
             24f +
             proximity *
-            10f *
-            anomalyFactor +
+            (
+                10f *
+                anomalyFactor +
+                temperatureBoost
+            ) +
             UnityEngine.Random.Range(
                 -0.7f,
                 0.7f
@@ -331,8 +563,11 @@ public class DatasetLogger : MonoBehaviour
         float humidity =
             45f +
             proximity *
-            16f *
-            anomalyFactor +
+            (
+                16f *
+                anomalyFactor +
+                humidityBoost
+            ) +
             UnityEngine.Random.Range(
                 -1.8f,
                 1.8f
@@ -341,8 +576,11 @@ public class DatasetLogger : MonoBehaviour
         float noise =
             52f +
             proximity *
-            20f *
-            anomalyFactor +
+            (
+                20f *
+                anomalyFactor +
+                noiseBoost
+            ) +
             UnityEngine.Random.Range(
                 -2.5f,
                 2.5f
@@ -351,8 +589,11 @@ public class DatasetLogger : MonoBehaviour
         float vibration =
             1.2f +
             proximity *
-            4.5f *
-            anomalyFactor +
+            (
+                4.5f *
+                anomalyFactor +
+                vibrationBoost
+            ) +
             UnityEngine.Random.Range(
                 -0.25f,
                 0.25f
@@ -540,6 +781,46 @@ public class DatasetLogger : MonoBehaviour
 
             batteryEventLogged = true;
         }
+    }
+
+    private int CalcularRiskScore(
+        bool completed
+    )
+    {
+        int score =
+            incidentBaseScore;
+
+        if (
+            currentZoneCriticality ==
+            "high" &&
+            currentIncidentType !=
+            "normal_operation"
+        )
+        {
+            score += 1;
+        }
+
+        if (currentObstacleCount >= 4)
+        {
+            score += 1;
+        }
+
+        if (!completed)
+        {
+            score += 4;
+        }
+
+        if (maxTemperature >= 35f)
+        {
+            score += 1;
+        }
+
+        if (maxVibration >= 5.3f)
+        {
+            score += 1;
+        }
+
+        return score;
     }
 
     private void RegistrarEvento(
