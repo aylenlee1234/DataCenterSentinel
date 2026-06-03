@@ -4,8 +4,8 @@ using UnityEngine;
 public class MissionManager : MonoBehaviour
 {
     public int totalMissions = 12;
-    public float pauseBetweenMissions = 1.5f;
-    public float maxMissionDuration = 30f;
+    public float pauseBetweenMissions = 1.2f;
+    public float maxMissionDuration = 35f;
 
     private RobotMover robotMover;
     private DynamicObstacleManager obstacleManager;
@@ -15,29 +15,35 @@ public class MissionManager : MonoBehaviour
     private Renderer destinationRenderer;
 
     private readonly Vector3 startPosition =
-        new Vector3(-8f, 0f, 0f);
+        new Vector3(-11f, 0f, 0f);
 
     private readonly Vector3[] destinationPositions =
     {
-        new Vector3(-4.5f, 0.35f, 5.2f),
-        new Vector3(1.5f, 0.35f, -5.2f),
-        new Vector3(7.5f, 0.35f, 5.3f),
-        new Vector3(4.5f, 0.35f, -5.2f)
+        new Vector3(-9.2f, 0.35f, 4.7f),
+        new Vector3(-9.2f, 0.35f, -4.7f),
+        new Vector3(9.2f, 0.35f, 4.7f),
+        new Vector3(9.2f, 0.35f, -4.7f),
+        new Vector3(4.6f, 0.35f, 5.3f),
+        new Vector3(4.6f, 0.35f, -5.3f)
     };
 
     private readonly string[] destinationNames =
     {
-        "Rack Norte",
+        "Sala Red",
         "Sala Energia",
         "Sala Cooling",
+        "Sala UPS",
+        "Rack Norte",
         "Rack Sur"
     };
 
     private readonly Color[] destinationColors =
     {
         Color.green,
-        Color.yellow,
+        new Color(0.92f, 0.30f, 0.18f),
         Color.cyan,
+        Color.yellow,
+        Color.blue,
         Color.magenta
     };
 
@@ -47,37 +53,19 @@ public class MissionManager : MonoBehaviour
             GetComponent<RobotMover>();
 
         obstacleManager =
-            GetComponent<
-                DynamicObstacleManager
-            >();
+            GetComponent<DynamicObstacleManager>();
 
         datasetLogger =
             GetComponent<DatasetLogger>();
 
-        if (robotMover == null)
+        if (
+            robotMover == null ||
+            obstacleManager == null ||
+            datasetLogger == null
+        )
         {
             Debug.LogError(
-                "MissionManager: falta RobotMover."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (obstacleManager == null)
-        {
-            Debug.LogError(
-                "MissionManager: falta DynamicObstacleManager."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (datasetLogger == null)
-        {
-            Debug.LogError(
-                "MissionManager: falta DatasetLogger."
+                "MissionManager: faltan componentes obligatorios."
             );
 
             enabled = false;
@@ -149,8 +137,7 @@ public class MissionManager : MonoBehaviour
     {
         for (
             int missionIndex = 0;
-            missionIndex <
-                totalMissions;
+            missionIndex < totalMissions;
             missionIndex++
         )
         {
@@ -182,10 +169,9 @@ public class MissionManager : MonoBehaviour
                     missionNumber
                 );
 
-            yield return
-                new WaitForSeconds(
-                    0.7f
-                );
+            yield return new WaitForSeconds(
+                0.7f
+            );
 
             robotMover.MoveTo(
                 destinationMarker.transform
@@ -245,10 +231,9 @@ public class MissionManager : MonoBehaviour
                 );
             }
 
-            yield return
-                new WaitForSeconds(
-                    pauseBetweenMissions
-                );
+            yield return new WaitForSeconds(
+                pauseBetweenMissions
+            );
         }
 
         Debug.Log(

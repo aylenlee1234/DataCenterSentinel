@@ -6,10 +6,9 @@ using Unity.AI.Navigation;
 
 public static class DataCenterSceneBuilder
 {
-    [MenuItem("Tools/DataCenter Sentinel/Generar escenario base")]
+    [MenuItem("Tools/DataCenter Sentinel/Generar data center completo")]
     public static void GenerarEscenario()
     {
-        // Crea una escena nueva desde cero.
         var scene = EditorSceneManager.NewScene(
             NewSceneSetup.DefaultGameObjects,
             NewSceneMode.Single
@@ -24,7 +23,7 @@ public static class DataCenterSceneBuilder
 
         Material pisoMaterial = CrearMaterial(
             "Piso",
-            new Color(0.16f, 0.20f, 0.26f)
+            new Color(0.12f, 0.16f, 0.22f)
         );
 
         Material paredMaterial = CrearMaterial(
@@ -32,93 +31,171 @@ public static class DataCenterSceneBuilder
             new Color(0.30f, 0.36f, 0.44f)
         );
 
+        Material pasilloMaterial = CrearMaterial(
+            "Pasillo",
+            new Color(0.20f, 0.26f, 0.34f)
+        );
+
         Material rackMaterial = CrearMaterial(
             "Rack",
-            new Color(0.10f, 0.35f, 0.60f)
+            new Color(0.08f, 0.34f, 0.62f)
+        );
+
+        Material coolingMaterial = CrearMaterial(
+            "Cooling",
+            new Color(0.10f, 0.72f, 0.82f)
+        );
+
+        Material upsMaterial = CrearMaterial(
+            "UPS",
+            new Color(0.88f, 0.60f, 0.10f)
+        );
+
+        Material energiaMaterial = CrearMaterial(
+            "Energia",
+            new Color(0.92f, 0.30f, 0.18f)
+        );
+
+        Material redMaterial = CrearMaterial(
+            "Red",
+            new Color(0.28f, 0.72f, 0.32f)
         );
 
         Material obstaculoMaterial = CrearMaterial(
             "Obstaculo",
-            new Color(0.80f, 0.22f, 0.16f)
+            new Color(0.82f, 0.22f, 0.16f)
         );
 
         Material robotMaterial = CrearMaterial(
             "RobotPlaceholder",
-            new Color(0.60f, 0.20f, 0.80f)
+            new Color(0.62f, 0.22f, 0.82f)
+        );
+
+        Material entradaMaterial = CrearMaterial(
+            "Entrada",
+            new Color(0.18f, 0.78f, 0.42f)
         );
 
         // ==========================
-        // ESTRUCTURA DEL DATA CENTER
+        // CONTENEDOR PRINCIPAL
         // ==========================
 
-        GameObject dataCenter = new GameObject("DataCenter");
+        GameObject dataCenter =
+            new GameObject("DataCenter");
 
-        // Piso
+        // ==========================
+        // PISO Y PAREDES
+        // ==========================
+
         CrearCubo(
             dataCenter.transform,
             "Floor",
             new Vector3(0f, -0.1f, 0f),
-            new Vector3(20f, 0.2f, 14f),
+            new Vector3(26f, 0.2f, 18f),
             pisoMaterial
         );
 
-        // Paredes exteriores
         CrearCubo(
             dataCenter.transform,
             "Wall_North",
-            new Vector3(0f, 1.5f, 6.9f),
-            new Vector3(20f, 3f, 0.2f),
+            new Vector3(0f, 1.6f, 8.9f),
+            new Vector3(26f, 3.2f, 0.2f),
             paredMaterial
         );
 
         CrearCubo(
             dataCenter.transform,
             "Wall_South",
-            new Vector3(0f, 1.5f, -6.9f),
-            new Vector3(20f, 3f, 0.2f),
+            new Vector3(0f, 1.6f, -8.9f),
+            new Vector3(26f, 3.2f, 0.2f),
             paredMaterial
         );
 
         CrearCubo(
             dataCenter.transform,
             "Wall_East",
-            new Vector3(9.9f, 1.5f, 0f),
-            new Vector3(0.2f, 3f, 14f),
+            new Vector3(12.9f, 1.6f, 0f),
+            new Vector3(0.2f, 3.2f, 18f),
             paredMaterial
         );
 
         CrearCubo(
             dataCenter.transform,
             "Wall_West",
-            new Vector3(-9.9f, 1.5f, 0f),
-            new Vector3(0.2f, 3f, 14f),
+            new Vector3(-12.9f, 1.6f, 0f),
+            new Vector3(0.2f, 3.2f, 18f),
             paredMaterial
         );
 
+        // Pasillo central horizontal
+        CrearCubo(
+            dataCenter.transform,
+            "Pasillo_Central",
+            new Vector3(0f, 0.02f, 0f),
+            new Vector3(23f, 0.04f, 1.6f),
+            pasilloMaterial
+        );
+
+        // Pasillos laterales
+        CrearCubo(
+            dataCenter.transform,
+            "Pasillo_Norte",
+            new Vector3(0f, 0.02f, 5.4f),
+            new Vector3(23f, 0.04f, 1.3f),
+            pasilloMaterial
+        );
+
+        CrearCubo(
+            dataCenter.transform,
+            "Pasillo_Sur",
+            new Vector3(0f, 0.02f, -5.4f),
+            new Vector3(23f, 0.04f, 1.3f),
+            pasilloMaterial
+        );
+
         // ==========================
-        // RACKS
+        // ENTRADA
         // ==========================
 
-        float[] posicionesX = { -4.5f, -1.5f, 1.5f, 4.5f };
+        CrearCubo(
+            dataCenter.transform,
+            "Zona_Entrada",
+            new Vector3(-11.2f, 0.03f, 0f),
+            new Vector3(2f, 0.06f, 2f),
+            entradaMaterial
+        );
+
+        // ==========================
+        // RACKS DE SERVIDORES
+        // ==========================
+
+        float[] posicionesX =
+        {
+            -5.8f,
+            -3.2f,
+            -0.6f,
+            2.0f,
+            4.6f,
+            7.2f
+        };
+
         int numeroRack = 1;
 
         foreach (float x in posicionesX)
         {
-            CrearCubo(
+            CrearRack(
                 dataCenter.transform,
                 $"Rack_{numeroRack:00}",
-                new Vector3(x, 1.25f, 3.2f),
-                new Vector3(1.2f, 2.5f, 1.5f),
+                new Vector3(x, 1.4f, 3.1f),
                 rackMaterial
             );
 
             numeroRack++;
 
-            CrearCubo(
+            CrearRack(
                 dataCenter.transform,
                 $"Rack_{numeroRack:00}",
-                new Vector3(x, 1.25f, -3.2f),
-                new Vector3(1.2f, 2.5f, 1.5f),
+                new Vector3(x, 1.4f, -3.1f),
                 rackMaterial
             );
 
@@ -126,22 +203,134 @@ public static class DataCenterSceneBuilder
         }
 
         // ==========================
-        // OBSTÁCULOS FIJOS DEL ESCENARIO BASE
+        // SALA DE REFRIGERACIÓN
+        // ==========================
+
+        CrearZonaPiso(
+            dataCenter.transform,
+            "Zona_Cooling",
+            new Vector3(10.1f, 0.03f, 5.8f),
+            new Vector3(4.2f, 0.06f, 4.2f),
+            coolingMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Cooling_Unit_01",
+            new Vector3(9.3f, 0.85f, 6.1f),
+            new Vector3(1.2f, 1.7f, 1.0f),
+            coolingMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Cooling_Unit_02",
+            new Vector3(11.0f, 0.85f, 6.1f),
+            new Vector3(1.2f, 1.7f, 1.0f),
+            coolingMaterial
+        );
+
+        // ==========================
+        // SALA UPS
+        // ==========================
+
+        CrearZonaPiso(
+            dataCenter.transform,
+            "Zona_UPS",
+            new Vector3(10.1f, 0.03f, -5.8f),
+            new Vector3(4.2f, 0.06f, 4.2f),
+            upsMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "UPS_Unit_01",
+            new Vector3(9.4f, 0.85f, -6.1f),
+            new Vector3(1.2f, 1.7f, 1.0f),
+            upsMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "UPS_Unit_02",
+            new Vector3(11.0f, 0.85f, -6.1f),
+            new Vector3(1.2f, 1.7f, 1.0f),
+            upsMaterial
+        );
+
+        // ==========================
+        // SALA DE ENERGÍA
+        // ==========================
+
+        CrearZonaPiso(
+            dataCenter.transform,
+            "Zona_Energia",
+            new Vector3(-9.5f, 0.03f, -5.8f),
+            new Vector3(4.6f, 0.06f, 4.2f),
+            energiaMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Tablero_Electrico_01",
+            new Vector3(-10.2f, 0.95f, -6.0f),
+            new Vector3(1.0f, 1.9f, 0.8f),
+            energiaMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Tablero_Electrico_02",
+            new Vector3(-8.7f, 0.95f, -6.0f),
+            new Vector3(1.0f, 1.9f, 0.8f),
+            energiaMaterial
+        );
+
+        // ==========================
+        // SALA DE RED
+        // ==========================
+
+        CrearZonaPiso(
+            dataCenter.transform,
+            "Zona_Red",
+            new Vector3(-9.5f, 0.03f, 5.8f),
+            new Vector3(4.6f, 0.06f, 4.2f),
+            redMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Network_Cabinet_01",
+            new Vector3(-10.2f, 1.0f, 6.0f),
+            new Vector3(1.0f, 2.0f, 0.8f),
+            redMaterial
+        );
+
+        CrearEquipoTecnico(
+            dataCenter.transform,
+            "Network_Cabinet_02",
+            new Vector3(-8.7f, 1.0f, 6.0f),
+            new Vector3(1.0f, 2.0f, 0.8f),
+            redMaterial
+        );
+
+        // ==========================
+        // OBSTÁCULOS FIJOS
         // ==========================
 
         CrearCubo(
             dataCenter.transform,
-            "Obstacle_Static_01",
-            new Vector3(0f, 0.5f, 0f),
-            new Vector3(1f, 1f, 1f),
+            "Caja_Tecnica_Fija",
+            new Vector3(-1.0f, 0.40f, 1.0f),
+            new Vector3(0.9f, 0.8f, 0.9f),
             obstaculoMaterial
         );
 
         CrearCubo(
             dataCenter.transform,
-            "Obstacle_Static_02",
-            new Vector3(3f, 0.4f, 1.2f),
-            new Vector3(0.8f, 0.8f, 0.8f),
+            "Herramientas_Mantenimiento",
+            new Vector3(5.5f, 0.35f, -1.1f),
+            new Vector3(1.1f, 0.7f, 0.8f),
             obstaculoMaterial
         );
 
@@ -149,24 +338,24 @@ public static class DataCenterSceneBuilder
         // ROBOT PROVISIONAL
         // ==========================
 
-        GameObject robot = new GameObject("UnitreeGo2_Placeholder");
+        GameObject robot =
+            new GameObject("UnitreeGo2_Placeholder");
 
-        robot.transform.position = new Vector3(
-            -8f,
-            0f,
-            0f
-        );
+        robot.transform.position =
+            new Vector3(-11f, 0f, 0f);
 
-        // Representación visual temporal.
-        // Más adelante se reemplaza por el modelo 3D real del Unitree Go2.
-        GameObject visual = GameObject.CreatePrimitive(
-            PrimitiveType.Capsule
-        );
+        GameObject visual =
+            GameObject.CreatePrimitive(
+                PrimitiveType.Capsule
+            );
 
         visual.name = "Visual";
         visual.transform.SetParent(robot.transform);
-        visual.transform.localPosition = new Vector3(0f, 0.5f, 0f);
-        visual.transform.localScale = new Vector3(0.65f, 0.5f, 0.65f);
+        visual.transform.localPosition =
+            new Vector3(0f, 0.5f, 0f);
+
+        visual.transform.localScale =
+            new Vector3(0.65f, 0.5f, 0.65f);
 
         visual
             .GetComponent<Renderer>()
@@ -183,30 +372,17 @@ public static class DataCenterSceneBuilder
         NavMeshAgent agent =
             robot.AddComponent<NavMeshAgent>();
 
-        agent.speed = 3f;
-        agent.angularSpeed = 240f;
-        agent.acceleration = 8f;
+        agent.speed = 4f;
+        agent.angularSpeed = 260f;
+        agent.acceleration = 10f;
         agent.radius = 0.35f;
         agent.height = 1.1f;
+        agent.stoppingDistance = 0.25f;
 
         robot.AddComponent<RobotMover>();
         robot.AddComponent<DynamicObstacleManager>();
+        robot.AddComponent<DatasetLogger>();
         robot.AddComponent<MissionManager>();
-
-        // Los loggers quedan desactivados por ahora.
-        // Primero verificamos visualmente los recorridos variables.
-        TelemetryLogger telemetryLogger =
-            robot.AddComponent<TelemetryLogger>();
-
-        SensorSimulator sensorSimulator =
-            robot.AddComponent<SensorSimulator>();
-
-        EventLogger eventLogger =
-            robot.AddComponent<EventLogger>();
-
-        telemetryLogger.enabled = false;
-        sensorSimulator.enabled = false;
-        eventLogger.enabled = false;
 
         // ==========================
         // NAVEGACIÓN
@@ -229,9 +405,11 @@ public static class DataCenterSceneBuilder
         if (camera != null)
         {
             camera.transform.position =
-                new Vector3(0f, 15f, -18f);
+                new Vector3(0f, 22f, -25f);
 
-            camera.transform.LookAt(Vector3.zero);
+            camera.transform.LookAt(
+                Vector3.zero
+            );
         }
 
         // ==========================
@@ -245,17 +423,67 @@ public static class DataCenterSceneBuilder
             "Assets/Scenes/DataCenterScene.unity"
         );
 
-        Selection.activeGameObject = robot;
+        Selection.activeGameObject =
+            robot;
 
         Debug.Log(
-            "Escenario generado correctamente. " +
-            "Tocá Play para iniciar misiones con destinos y obstáculos variables."
+            "Data center completo generado correctamente."
         );
     }
 
     // ==========================
     // MÉTODOS AUXILIARES
     // ==========================
+
+    private static void CrearRack(
+        Transform parent,
+        string nombre,
+        Vector3 posicion,
+        Material material
+    )
+    {
+        CrearCubo(
+            parent,
+            nombre,
+            posicion,
+            new Vector3(1.2f, 2.8f, 1.5f),
+            material
+        );
+    }
+
+    private static void CrearZonaPiso(
+        Transform parent,
+        string nombre,
+        Vector3 posicion,
+        Vector3 escala,
+        Material material
+    )
+    {
+        CrearCubo(
+            parent,
+            nombre,
+            posicion,
+            escala,
+            material
+        );
+    }
+
+    private static void CrearEquipoTecnico(
+        Transform parent,
+        string nombre,
+        Vector3 posicion,
+        Vector3 escala,
+        Material material
+    )
+    {
+        CrearCubo(
+            parent,
+            nombre,
+            posicion,
+            escala,
+            material
+        );
+    }
 
     private static GameObject CrearCubo(
         Transform parent,
@@ -325,22 +553,20 @@ public static class DataCenterSceneBuilder
                     Shader.Find("Standard");
             }
 
-            material = new Material(shader);
-            material.color = color;
+            material =
+                new Material(shader);
 
             AssetDatabase.CreateAsset(
                 material,
                 ruta
             );
         }
-        else
-        {
-            material.color = color;
 
-            EditorUtility.SetDirty(
-                material
-            );
-        }
+        material.color = color;
+
+        EditorUtility.SetDirty(
+            material
+        );
 
         return material;
     }

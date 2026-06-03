@@ -58,10 +58,13 @@ public class DatasetLogger : MonoBehaviour
             return;
         }
 
-        dataFolder = Path.Combine(
-            Application.dataPath,
-            "Data"
-        );
+        dataFolder = Path.GetFullPath(
+    Path.Combine(
+        Application.dataPath,
+        "..",
+        "Exports"
+    )
+);
 
         Directory.CreateDirectory(dataFolder);
 
