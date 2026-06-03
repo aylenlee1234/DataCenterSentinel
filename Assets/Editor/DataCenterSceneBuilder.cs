@@ -9,10 +9,18 @@ public static class DataCenterSceneBuilder
     [MenuItem("Tools/DataCenter Sentinel/Generar escenario base")]
     public static void GenerarEscenario()
     {
+        // Crea una escena nueva desde cero.
         var scene = EditorSceneManager.NewScene(
             NewSceneSetup.DefaultGameObjects,
             NewSceneMode.Single
         );
+
+        CrearCarpetaSiNoExiste("Assets", "Scenes");
+        CrearCarpetaSiNoExiste("Assets", "Materials");
+
+        // ==========================
+        // MATERIALES
+        // ==========================
 
         Material pisoMaterial = CrearMaterial(
             "Piso",
@@ -34,15 +42,14 @@ public static class DataCenterSceneBuilder
             new Color(0.80f, 0.22f, 0.16f)
         );
 
-        Material destinoMaterial = CrearMaterial(
-            "Destino",
-            new Color(0.15f, 0.80f, 0.32f)
-        );
-
         Material robotMaterial = CrearMaterial(
             "RobotPlaceholder",
             new Color(0.60f, 0.20f, 0.80f)
         );
+
+        // ==========================
+        // ESTRUCTURA DEL DATA CENTER
+        // ==========================
 
         GameObject dataCenter = new GameObject("DataCenter");
 
@@ -88,7 +95,10 @@ public static class DataCenterSceneBuilder
             paredMaterial
         );
 
-        // Racks
+        // ==========================
+        // RACKS
+        // ==========================
+
         float[] posicionesX = { -4.5f, -1.5f, 1.5f, 4.5f };
         int numeroRack = 1;
 
@@ -115,10 +125,13 @@ public static class DataCenterSceneBuilder
             numeroRack++;
         }
 
-        // Obstáculos iniciales
+        // ==========================
+        // OBSTÁCULOS FIJOS DEL ESCENARIO BASE
+        // ==========================
+
         CrearCubo(
             dataCenter.transform,
-            "Obstacle_01",
+            "Obstacle_Static_01",
             new Vector3(0f, 0.5f, 0f),
             new Vector3(1f, 1f, 1f),
             obstaculoMaterial
@@ -126,58 +139,106 @@ public static class DataCenterSceneBuilder
 
         CrearCubo(
             dataCenter.transform,
-            "Obstacle_02",
+            "Obstacle_Static_02",
             new Vector3(3f, 0.4f, 1.2f),
             new Vector3(0.8f, 0.8f, 0.8f),
             obstaculoMaterial
         );
 
-        // Punto de destino
-        GameObject target = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        target.name = "Target_SalaCooling";
-        target.transform.position = new Vector3(7.5f, 0.35f, 5.3f);
-        target.transform.localScale = Vector3.one * 0.7f;
-        target.GetComponent<Renderer>().sharedMaterial = destinoMaterial;
+        // ==========================
+        // ROBOT PROVISIONAL
+        // ==========================
 
-        Object.DestroyImmediate(target.GetComponent<Collider>());
-
-        // Robot provisional
         GameObject robot = new GameObject("UnitreeGo2_Placeholder");
-        robot.transform.position = new Vector3(-8f, 0f, 0f);
 
-        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        robot.transform.position = new Vector3(
+            -8f,
+            0f,
+            0f
+        );
+
+        // Representación visual temporal.
+        // Más adelante se reemplaza por el modelo 3D real del Unitree Go2.
+        GameObject visual = GameObject.CreatePrimitive(
+            PrimitiveType.Capsule
+        );
+
         visual.name = "Visual";
         visual.transform.SetParent(robot.transform);
         visual.transform.localPosition = new Vector3(0f, 0.5f, 0f);
         visual.transform.localScale = new Vector3(0.65f, 0.5f, 0.65f);
-        visual.GetComponent<Renderer>().sharedMaterial = robotMaterial;
 
-        Object.DestroyImmediate(visual.GetComponent<Collider>());
+        visual
+            .GetComponent<Renderer>()
+            .sharedMaterial = robotMaterial;
 
-        // Navegación del robot
-        NavMeshAgent agent = robot.AddComponent<NavMeshAgent>();
+        Object.DestroyImmediate(
+            visual.GetComponent<Collider>()
+        );
+
+        // ==========================
+        // COMPONENTES DEL ROBOT
+        // ==========================
+
+        NavMeshAgent agent =
+            robot.AddComponent<NavMeshAgent>();
+
         agent.speed = 3f;
         agent.angularSpeed = 240f;
         agent.acceleration = 8f;
         agent.radius = 0.35f;
         agent.height = 1.1f;
 
-        RobotMover mover = robot.AddComponent<RobotMover>();
-        mover.target = target.transform;
+        robot.AddComponent<RobotMover>();
+        robot.AddComponent<DynamicObstacleManager>();
+        robot.AddComponent<MissionManager>();
 
-        // Superficie navegable
-        GameObject navigation = new GameObject("Navigation");
-        NavMeshSurface surface = navigation.AddComponent<NavMeshSurface>();
+        // Los loggers quedan desactivados por ahora.
+        // Primero verificamos visualmente los recorridos variables.
+        TelemetryLogger telemetryLogger =
+            robot.AddComponent<TelemetryLogger>();
+
+        SensorSimulator sensorSimulator =
+            robot.AddComponent<SensorSimulator>();
+
+        EventLogger eventLogger =
+            robot.AddComponent<EventLogger>();
+
+        telemetryLogger.enabled = false;
+        sensorSimulator.enabled = false;
+        eventLogger.enabled = false;
+
+        // ==========================
+        // NAVEGACIÓN
+        // ==========================
+
+        GameObject navigation =
+            new GameObject("Navigation");
+
+        NavMeshSurface surface =
+            navigation.AddComponent<NavMeshSurface>();
+
         surface.BuildNavMesh();
 
-        // Cámara
+        // ==========================
+        // CÁMARA
+        // ==========================
+
         Camera camera = Camera.main;
 
         if (camera != null)
         {
-            camera.transform.position = new Vector3(0f, 15f, -18f);
+            camera.transform.position =
+                new Vector3(0f, 15f, -18f);
+
             camera.transform.LookAt(Vector3.zero);
         }
+
+        // ==========================
+        // GUARDAR ESCENA
+        // ==========================
+
+        AssetDatabase.SaveAssets();
 
         EditorSceneManager.SaveScene(
             scene,
@@ -187,9 +248,14 @@ public static class DataCenterSceneBuilder
         Selection.activeGameObject = robot;
 
         Debug.Log(
-            "Escenario generado correctamente. Tocá Play para iniciar el recorrido."
+            "Escenario generado correctamente. " +
+            "Tocá Play para iniciar misiones con destinos y obstáculos variables."
         );
     }
+
+    // ==========================
+    // MÉTODOS AUXILIARES
+    // ==========================
 
     private static GameObject CrearCubo(
         Transform parent,
@@ -199,15 +265,38 @@ public static class DataCenterSceneBuilder
         Material material
     )
     {
-        GameObject cubo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject cubo =
+            GameObject.CreatePrimitive(
+                PrimitiveType.Cube
+            );
 
         cubo.name = nombre;
         cubo.transform.SetParent(parent);
         cubo.transform.position = posicion;
         cubo.transform.localScale = escala;
-        cubo.GetComponent<Renderer>().sharedMaterial = material;
+
+        cubo
+            .GetComponent<Renderer>()
+            .sharedMaterial = material;
 
         return cubo;
+    }
+
+    private static void CrearCarpetaSiNoExiste(
+        string carpetaPadre,
+        string nuevaCarpeta
+    )
+    {
+        string ruta =
+            $"{carpetaPadre}/{nuevaCarpeta}";
+
+        if (!AssetDatabase.IsValidFolder(ruta))
+        {
+            AssetDatabase.CreateFolder(
+                carpetaPadre,
+                nuevaCarpeta
+            );
+        }
     }
 
     private static Material CrearMaterial(
@@ -215,28 +304,42 @@ public static class DataCenterSceneBuilder
         Color color
     )
     {
-        string ruta = $"Assets/Materials/{nombre}.mat";
+        string ruta =
+            $"Assets/Materials/{nombre}.mat";
 
-        Material material = AssetDatabase.LoadAssetAtPath<Material>(ruta);
+        Material material =
+            AssetDatabase.LoadAssetAtPath<Material>(
+                ruta
+            );
 
         if (material == null)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            Shader shader =
+                Shader.Find(
+                    "Universal Render Pipeline/Lit"
+                );
 
             if (shader == null)
             {
-                shader = Shader.Find("Standard");
+                shader =
+                    Shader.Find("Standard");
             }
 
             material = new Material(shader);
             material.color = color;
 
-            AssetDatabase.CreateAsset(material, ruta);
+            AssetDatabase.CreateAsset(
+                material,
+                ruta
+            );
         }
         else
         {
             material.color = color;
-            EditorUtility.SetDirty(material);
+
+            EditorUtility.SetDirty(
+                material
+            );
         }
 
         return material;
