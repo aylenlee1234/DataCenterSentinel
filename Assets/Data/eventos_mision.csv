@@ -1,0 +1,5 @@
+mission_id,elapsed_seconds,event_type,severity,value
+M0001,7.04,temperatura_elevada,media,33.25
+M0001,7.04,humedad_elevada,media,61.55
+M0001,7.04,ruido_anormal,media,69.08
+M0001,7.04,vibracion_anormal,media,4.91

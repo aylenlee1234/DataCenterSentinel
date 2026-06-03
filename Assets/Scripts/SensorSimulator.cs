@@ -7,9 +7,14 @@ public class SensorSimulator : MonoBehaviour
     public string missionId = "M0001";
     public float logIntervalSeconds = 0.5f;
 
-    // Zona crítica simulada: cerca de la esfera verde
     public Vector3 hotspotPosition = new Vector3(7.5f, 0f, 5.3f);
     public float hotspotRadius = 4f;
+
+    public float CurrentTemperature { get; private set; }
+    public float CurrentHumidity { get; private set; }
+    public float CurrentNoise { get; private set; }
+    public float CurrentVibration { get; private set; }
+    public float CurrentHotspotDistance { get; private set; }
 
     private string filePath;
     private float elapsedTime;
@@ -53,31 +58,31 @@ public class SensorSimulator : MonoBehaviour
             transform.position.z
         );
 
-        float distanceToHotspot = Vector3.Distance(
+        CurrentHotspotDistance = Vector3.Distance(
             robotPosition,
             hotspotPosition
         );
 
         float intensity = Mathf.Clamp01(
-            1f - distanceToHotspot / hotspotRadius
+            1f - CurrentHotspotDistance / hotspotRadius
         );
 
-        float temperature =
+        CurrentTemperature =
             24f +
             intensity * 12f +
             Random.Range(-0.8f, 0.8f);
 
-        float humidity =
+        CurrentHumidity =
             45f +
             intensity * 18f +
             Random.Range(-2f, 2f);
 
-        float noise =
+        CurrentNoise =
             52f +
             intensity * 22f +
             Random.Range(-3f, 3f);
 
-        float vibration =
+        CurrentVibration =
             1.2f +
             intensity * 4.5f +
             Random.Range(-0.3f, 0.3f);
@@ -87,11 +92,11 @@ public class SensorSimulator : MonoBehaviour
             elapsedTime.ToString("F2", CultureInfo.InvariantCulture),
             transform.position.x.ToString("F3", CultureInfo.InvariantCulture),
             transform.position.z.ToString("F3", CultureInfo.InvariantCulture),
-            distanceToHotspot.ToString("F3", CultureInfo.InvariantCulture),
-            temperature.ToString("F2", CultureInfo.InvariantCulture),
-            humidity.ToString("F2", CultureInfo.InvariantCulture),
-            noise.ToString("F2", CultureInfo.InvariantCulture),
-            vibration.ToString("F2", CultureInfo.InvariantCulture)
+            CurrentHotspotDistance.ToString("F3", CultureInfo.InvariantCulture),
+            CurrentTemperature.ToString("F2", CultureInfo.InvariantCulture),
+            CurrentHumidity.ToString("F2", CultureInfo.InvariantCulture),
+            CurrentNoise.ToString("F2", CultureInfo.InvariantCulture),
+            CurrentVibration.ToString("F2", CultureInfo.InvariantCulture)
         );
 
         File.AppendAllText(filePath, line + "\n");
