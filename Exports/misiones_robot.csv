@@ -1,11 +1,8 @@
 mission_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level
-M0001,Sala Red,network,medium,multiple_anomalies,1,1.312,yes,100.000,99.876,36.744,62.780,73.212,7.160,6,yes,high
-M0002,Sala Energia,electrical,high,multiple_anomalies,2,1.311,yes,100.000,99.871,34.920,60.406,72.177,6.485,6,yes,high
-M0003,Sala Cooling,cooling,high,multiple_anomalies,5,6.381,yes,100.000,99.396,37.491,63.491,76.860,7.427,6,yes,high
-M0004,Sala UPS,power_backup,high,normal_operation,5,5.630,yes,100.000,99.427,31.275,56.583,65.532,4.403,2,no,low
-M0005,Rack Norte,server_rack,medium,normal_operation,2,5.467,yes,100.000,99.582,28.175,51.296,62.981,3.327,2,no,low
-M0006,Rack Sur,server_rack,medium,normal_operation,2,5.062,yes,100.000,99.557,28.716,53.493,62.153,3.330,2,no,low
-M0007,Sala Red,network,medium,normal_operation,3,1.312,yes,100.000,99.864,31.321,57.065,66.561,4.529,3,no,low
-M0008,Sala Energia,electrical,high,electrical_instability,4,1.313,yes,100.000,99.858,34.037,55.213,70.423,6.389,5,yes,high
-M0009,Sala Cooling,cooling,high,cooling_failure,2,6.619,yes,100.000,99.455,36.897,64.725,70.744,4.789,6,yes,high
-M0010,Sala UPS,power_backup,high,access_obstruction,4,5.879,yes,100.000,99.447,30.807,55.953,64.129,3.957,2,yes,high
+M0001,Sala Red,network,medium,multiple_anomalies,1,1.315,yes,100.000,99.876,36.520,61.919,71.063,6.832,6,yes,high
+M0002,Sala Energia,electrical,high,multiple_anomalies,2,1.317,yes,100.000,99.871,35.946,61.997,68.526,6.787,6,yes,high
+M0003,Sala Cooling,cooling,high,multiple_anomalies,5,6.487,yes,100.000,99.399,38.081,62.430,75.220,7.835,6,yes,high
+M0004,Sala UPS,power_backup,high,normal_operation,5,5.630,yes,100.000,99.427,31.573,58.499,67.236,4.536,4,no,low
+M0005,Rack Norte,server_rack,medium,normal_operation,2,5.458,yes,100.000,99.583,28.643,51.774,59.343,3.368,2,no,low
+M0006,Rack Sur,server_rack,medium,normal_operation,2,5.076,yes,100.000,99.556,28.820,52.265,60.904,3.041,2,no,low
+M0007,Sala Red,network,medium,normal_operation,3,1.314,yes,100.000,99.864,31.707,57.230,65.778,4.848,3,no,low

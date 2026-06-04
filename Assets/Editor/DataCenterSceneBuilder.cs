@@ -690,6 +690,17 @@ surface.BuildNavMesh();
             camera.transform.LookAt(
                 Vector3.zero
             );
+
+            if (
+                camera.GetComponent<
+                    CameraOrbitController
+                >() == null
+            )
+            {
+                camera.gameObject.AddComponent<
+                    CameraOrbitController
+                >();
+            }
         }
 
         RenderSettings.ambientLight =
@@ -1943,5 +1954,5 @@ private static void CrearRackVisual(
         );
 
         return material;
-    }
+   }
 }
