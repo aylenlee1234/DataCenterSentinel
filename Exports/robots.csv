@@ -1,0 +1,2 @@
+robot_id,model,simulation_speed_m_s,initial_battery_pct,status
+R01,Unitree Go2 Virtual Twin,4.0,100,operational

@@ -1,8 +1,21 @@
-mission_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level
-M0001,Sala Red,network,medium,multiple_anomalies,1,1.315,yes,100.000,99.876,36.520,61.919,71.063,6.832,6,yes,high
-M0002,Sala Energia,electrical,high,multiple_anomalies,2,1.317,yes,100.000,99.871,35.946,61.997,68.526,6.787,6,yes,high
-M0003,Sala Cooling,cooling,high,multiple_anomalies,5,6.487,yes,100.000,99.399,38.081,62.430,75.220,7.835,6,yes,high
-M0004,Sala UPS,power_backup,high,normal_operation,5,5.630,yes,100.000,99.427,31.573,58.499,67.236,4.536,4,no,low
-M0005,Rack Norte,server_rack,medium,normal_operation,2,5.458,yes,100.000,99.583,28.643,51.774,59.343,3.368,2,no,low
-M0006,Rack Sur,server_rack,medium,normal_operation,2,5.076,yes,100.000,99.556,28.820,52.265,60.904,3.041,2,no,low
-M0007,Sala Red,network,medium,normal_operation,3,1.314,yes,100.000,99.864,31.707,57.230,65.778,4.848,3,no,low
+mission_id,alert_id,robot_id,zone_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level
+M0001,AL0001,R01,Z01,Sala Red,network,medium,multiple_anomalies,1,1.315,yes,100.000,99.876,36.696,62.622,72.551,6.824,6,yes,high
+M0002,AL0002,R01,Z02,Sala Energia,electrical,high,multiple_anomalies,2,1.314,yes,100.000,99.869,35.712,59.072,71.042,6.871,6,yes,high
+M0003,AL0003,R01,Z03,Sala Cooling,cooling,high,multiple_anomalies,5,6.560,yes,100.000,99.419,38.257,62.682,75.066,7.523,6,yes,high
+M0004,AL0004,R01,Z04,Sala UPS,power_backup,high,normal_operation,5,6.648,yes,100.000,99.382,31.336,57.762,66.136,4.598,3,no,low
+M0005,AL0005,R01,Z05,Rack Norte,server_rack,medium,normal_operation,2,5.480,yes,100.000,99.583,28.942,51.167,59.352,3.222,2,no,low
+M0006,AL0006,R01,Z06,Rack Sur,server_rack,medium,normal_operation,2,4.514,yes,100.000,99.614,28.097,51.583,63.192,3.034,2,no,low
+M0007,AL0007,R01,Z01,Sala Red,network,medium,normal_operation,3,1.314,yes,100.000,99.864,32.190,58.677,67.965,4.662,5,no,low
+M0008,AL0008,R01,Z02,Sala Energia,electrical,high,electrical_instability,4,1.314,yes,100.000,99.858,34.398,55.194,70.458,6.391,5,yes,high
+M0009,AL0009,R01,Z03,Sala Cooling,cooling,high,cooling_failure,2,5.820,yes,100.000,99.483,36.948,65.434,70.863,4.750,6,yes,high
+M0010,AL0010,R01,Z04,Sala UPS,power_backup,high,access_obstruction,4,6.593,yes,100.000,99.401,30.285,56.357,63.512,4.234,2,yes,high
+M0011,AL0011,R01,Z05,Rack Norte,server_rack,medium,rack_overheating,1,5.477,yes,100.000,99.600,37.596,58.465,71.596,5.360,6,yes,high
+M0012,AL0012,R01,Z06,Rack Sur,server_rack,medium,rack_overheating,2,4.484,yes,100.000,99.614,36.241,54.466,70.059,5.189,5,yes,high
+M0013,AL0013,R01,Z01,Sala Red,network,medium,network_overload,3,1.317,yes,100.000,99.864,32.858,54.783,73.902,4.007,4,no,medium
+M0014,AL0014,R01,Z02,Sala Energia,electrical,high,electrical_instability,4,1.323,yes,100.000,99.858,33.513,54.762,66.102,5.668,4,yes,high
+M0015,AL0015,R01,Z03,Sala Cooling,cooling,high,multiple_anomalies,5,5.927,yes,100.000,99.429,34.300,58.946,66.933,6.398,5,yes,high
+M0016,AL0016,R01,Z04,Sala UPS,power_backup,high,multiple_anomalies,3,6.587,yes,100.000,99.419,34.849,61.370,71.795,6.607,6,yes,high
+M0017,AL0017,R01,Z05,Rack Norte,server_rack,medium,normal_operation,3,4.544,yes,100.000,99.555,29.692,53.038,61.320,3.364,2,no,low
+M0018,AL0018,R01,Z06,Rack Sur,server_rack,medium,normal_operation,4,5.467,yes,100.000,99.532,28.660,53.841,61.924,2.956,2,no,low
+M0019,AL0019,R01,Z01,Sala Red,network,medium,normal_operation,4,1.313,yes,100.000,99.857,28.379,51.238,58.736,2.922,2,no,low
+M0020,AL0020,R01,Z02,Sala Energia,electrical,high,electrical_instability,3,1.315,yes,100.000,99.864,32.255,50.476,63.764,5.327,4,yes,high

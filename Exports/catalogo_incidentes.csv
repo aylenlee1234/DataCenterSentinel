@@ -1,0 +1,8 @@
+incident_type_ground_truth,description,base_severity,primary_signal
+normal_operation,Operacion normal,low,none
+cooling_failure,Falla de refrigeracion,high,temperature_humidity
+electrical_instability,Inestabilidad electrica,high,vibration_temperature
+rack_overheating,Sobrecalentamiento de rack,medium,temperature
+network_overload,Sobrecarga de red,medium,noise_temperature
+access_obstruction,Bloqueo de acceso,medium,obstacles
+multiple_anomalies,Varias anomalias simultaneas,critical,multiple

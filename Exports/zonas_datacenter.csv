@@ -1,0 +1,7 @@
+zone_id,destination,zone_type,criticality,coord_x,coord_z,asset_count
+Z01,Sala Red,network,medium,-9.2,4.7,2
+Z02,Sala Energia,electrical,high,-9.2,-4.7,3
+Z03,Sala Cooling,cooling,high,9.2,4.7,3
+Z04,Sala UPS,power_backup,high,9.2,-4.7,3
+Z05,Rack Norte,server_rack,medium,4.6,5.3,6
+Z06,Rack Sur,server_rack,medium,4.6,-5.3,6

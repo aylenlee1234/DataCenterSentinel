@@ -5,9 +5,19 @@ using UnityEngine.AI;
 
 public class DatasetLogger : MonoBehaviour
 {
+    // =====================================================
+    // CONFIGURACIÓN
+    // =====================================================
+
     public float logIntervalSeconds = 0.5f;
     public float initialBatteryPct = 100f;
     public bool clearFilesWhenPlayStarts = true;
+
+    public string robotId = "R01";
+
+    // =====================================================
+    // COMPONENTES Y ARCHIVOS
+    // =====================================================
 
     private NavMeshAgent agent;
 
@@ -16,17 +26,38 @@ public class DatasetLogger : MonoBehaviour
     private string telemetryPath;
     private string sensorsPath;
     private string eventsPath;
+    private string iotAlertsPath;
+
+    // =====================================================
+    // MISIÓN ACTUAL
+    // =====================================================
 
     private bool missionActive;
 
     private string currentMissionId;
     private string currentDestinationName;
+    private string currentZoneId;
     private string currentZoneType;
     private string currentZoneCriticality;
     private string currentIncidentType;
 
     private int currentObstacleCount;
     private Vector3 currentDestinationPosition;
+
+    // =====================================================
+    // ALERTA IOT ACTUAL
+    // =====================================================
+
+    private string currentAlertId;
+    private string currentAlertType;
+    private string currentAlertSeverity;
+
+    private float currentAlertSensorValue;
+    private float currentAlertThreshold;
+
+    // =====================================================
+    // TIEMPO, BATERÍA E INCIDENTE
+    // =====================================================
 
     private float missionStartTime;
     private float nextLogTime;
@@ -40,10 +71,18 @@ public class DatasetLogger : MonoBehaviour
 
     private int incidentBaseScore;
 
+    // =====================================================
+    // VALORES MÁXIMOS
+    // =====================================================
+
     private float maxTemperature;
     private float maxHumidity;
     private float maxNoise;
     private float maxVibration;
+
+    // =====================================================
+    // EVENTOS
+    // =====================================================
 
     private int eventCount;
 
@@ -52,6 +91,10 @@ public class DatasetLogger : MonoBehaviour
     private bool noiseEventLogged;
     private bool vibrationEventLogged;
     private bool batteryEventLogged;
+
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
 
     private void Awake()
     {
@@ -67,8 +110,8 @@ public class DatasetLogger : MonoBehaviour
             return;
         }
 
-        // Exporta los CSV afuera de Assets para que Unity
-        // no intente reimportarlos mientras se modifican.
+        // Los CSV se guardan afuera de Assets.
+        // Esto evita que Unity intente reimportarlos mientras cambian.
         dataFolder = Path.GetFullPath(
             Path.Combine(
                 Application.dataPath,
@@ -99,29 +142,43 @@ public class DatasetLogger : MonoBehaviour
             "eventos_mision.csv"
         );
 
+        iotAlertsPath = Path.Combine(
+            dataFolder,
+            "alertas_iot.csv"
+        );
+
         PrepararArchivos();
     }
+
+    // =====================================================
+    // PREPARAR CSV
+    // =====================================================
 
     private void PrepararArchivos()
     {
         PrepararArchivo(
             missionsPath,
-            "mission_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level\n"
+            "mission_id,alert_id,robot_id,zone_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level\n"
         );
 
         PrepararArchivo(
             telemetryPath,
-            "mission_id,elapsed_seconds,pos_x,pos_y,pos_z,speed,remaining_distance,battery_pct\n"
+            "mission_id,robot_id,elapsed_seconds,pos_x,pos_y,pos_z,speed,remaining_distance,battery_pct\n"
         );
 
         PrepararArchivo(
             sensorsPath,
-            "mission_id,elapsed_seconds,destination,hotspot_distance,temperature_c,humidity_pct,noise_db,vibration\n"
+            "mission_id,robot_id,elapsed_seconds,destination,hotspot_distance,temperature_c,humidity_pct,noise_db,vibration\n"
         );
 
         PrepararArchivo(
             eventsPath,
-            "mission_id,elapsed_seconds,event_type,severity,value\n"
+            "mission_id,robot_id,elapsed_seconds,event_type,severity,value\n"
+        );
+
+        PrepararArchivo(
+            iotAlertsPath,
+            "alert_id,mission_id,robot_id,zone_id,alert_type,sensor_value,threshold,alert_severity,robot_dispatched,validation_result\n"
         );
     }
 
@@ -141,6 +198,10 @@ public class DatasetLogger : MonoBehaviour
             );
         }
     }
+
+    // =====================================================
+    // INICIO DE MISIÓN
+    // =====================================================
 
     public void BeginMission(
         string missionId,
@@ -174,9 +235,9 @@ public class DatasetLogger : MonoBehaviour
 
         ConfigurarZona();
         ConfigurarIncidenteOculto(missionNumber);
+        ConfigurarAlertaIoT(missionNumber);
 
-        // Hace reproducibles las pequeñas variaciones
-        // ambientales de cada misión.
+        // Hace reproducibles las variaciones ambientales.
         UnityEngine.Random.InitState(
             missionNumber * 911
         );
@@ -190,11 +251,15 @@ public class DatasetLogger : MonoBehaviour
         );
 
         Debug.Log(
-            $"{currentMissionId}: escenario oculto → " +
-            $"{currentIncidentType}. Zona → " +
-            $"{currentZoneType} ({currentZoneCriticality})."
+            $"{currentMissionId}: alerta IoT → " +
+            $"{currentAlertId}, {currentAlertType}. " +
+            $"Robot enviado a {currentDestinationName}."
         );
     }
+
+    // =====================================================
+    // FIN DE MISIÓN
+    // =====================================================
 
     public void EndMission(bool completed)
     {
@@ -223,10 +288,13 @@ public class DatasetLogger : MonoBehaviour
         }
 
         float durationSeconds =
-            Time.time - missionStartTime;
+            Time.time -
+            missionStartTime;
 
         int finalRiskScore =
-            CalcularRiskScore(completed);
+            CalcularRiskScore(
+                completed
+            );
 
         string requiresIntervention =
             finalRiskScore >= 3
@@ -248,16 +316,32 @@ public class DatasetLogger : MonoBehaviour
             riskLevel = "high";
         }
 
+        // La alerta IoT se valida con la inspección física.
+        string validationResult =
+            currentIncidentType ==
+            "normal_operation"
+                ? "false_positive"
+                : "confirmed";
+
+        GuardarAlertaIoT(
+            validationResult
+        );
+
         string line = string.Join(
             ",",
             currentMissionId,
+            currentAlertId,
+            robotId,
+            currentZoneId,
             currentDestinationName,
             currentZoneType,
             currentZoneCriticality,
             currentIncidentType,
             currentObstacleCount.ToString(),
             Formatear(durationSeconds),
-            completed ? "yes" : "no",
+            completed
+                ? "yes"
+                : "no",
             Formatear(initialBatteryPct),
             Formatear(batteryPct),
             Formatear(maxTemperature),
@@ -277,11 +361,16 @@ public class DatasetLogger : MonoBehaviour
         missionActive = false;
 
         Debug.Log(
-            $"{currentMissionId}: dataset guardado. " +
-            $"Intervención → {requiresIntervention}. " +
+            $"{currentMissionId}: alerta IoT → " +
+            $"{validationResult}. " +
+            $"Intervención técnica → {requiresIntervention}. " +
             $"Riesgo → {riskLevel}."
         );
     }
+
+    // =====================================================
+    // REGISTRO PERIÓDICO
+    // =====================================================
 
     private void Update()
     {
@@ -300,66 +389,61 @@ public class DatasetLogger : MonoBehaviour
         }
     }
 
+    // =====================================================
+    // CONFIGURAR ZONA
+    // =====================================================
+
     private void ConfigurarZona()
     {
         switch (currentDestinationName)
         {
             case "Sala Red":
-                currentZoneType =
-                    "network";
-
-                currentZoneCriticality =
-                    "medium";
-
+                currentZoneId = "Z01";
+                currentZoneType = "network";
+                currentZoneCriticality = "medium";
                 break;
 
             case "Sala Energia":
-                currentZoneType =
-                    "electrical";
-
-                currentZoneCriticality =
-                    "high";
-
+                currentZoneId = "Z02";
+                currentZoneType = "electrical";
+                currentZoneCriticality = "high";
                 break;
 
             case "Sala Cooling":
-                currentZoneType =
-                    "cooling";
-
-                currentZoneCriticality =
-                    "high";
-
+                currentZoneId = "Z03";
+                currentZoneType = "cooling";
+                currentZoneCriticality = "high";
                 break;
 
             case "Sala UPS":
-                currentZoneType =
-                    "power_backup";
-
-                currentZoneCriticality =
-                    "high";
-
+                currentZoneId = "Z04";
+                currentZoneType = "power_backup";
+                currentZoneCriticality = "high";
                 break;
 
             case "Rack Norte":
+                currentZoneId = "Z05";
+                currentZoneType = "server_rack";
+                currentZoneCriticality = "medium";
+                break;
+
             case "Rack Sur":
-                currentZoneType =
-                    "server_rack";
-
-                currentZoneCriticality =
-                    "medium";
-
+                currentZoneId = "Z06";
+                currentZoneType = "server_rack";
+                currentZoneCriticality = "medium";
                 break;
 
             default:
-                currentZoneType =
-                    "general";
-
-                currentZoneCriticality =
-                    "low";
-
+                currentZoneId = "Z00";
+                currentZoneType = "general";
+                currentZoneCriticality = "low";
                 break;
         }
     }
+
+    // =====================================================
+    // INCIDENTE OCULTO
+    // =====================================================
 
     private void ConfigurarIncidenteOculto(
         int missionNumber
@@ -380,6 +464,7 @@ public class DatasetLogger : MonoBehaviour
         humidityBoost = 0f;
         noiseBoost = 0f;
         vibrationBoost = 0f;
+
         incidentBaseScore = 0;
 
         int normalThreshold =
@@ -388,7 +473,10 @@ public class DatasetLogger : MonoBehaviour
                 : 40;
 
         int roll =
-            random.Next(0, 100);
+            random.Next(
+                0,
+                100
+            );
 
         if (roll < normalThreshold)
         {
@@ -489,6 +577,272 @@ public class DatasetLogger : MonoBehaviour
         }
     }
 
+    // =====================================================
+    // ALERTA IOT PREVIA
+    // =====================================================
+
+    private void ConfigurarAlertaIoT(
+        int missionNumber
+    )
+    {
+        System.Random random =
+            new System.Random(
+                missionNumber * 1291 +
+                currentObstacleCount * 29
+            );
+
+        currentAlertId =
+            $"AL{missionNumber:0000}";
+
+        switch (currentIncidentType)
+        {
+            case "cooling_failure":
+                currentAlertType =
+                    ElegirValor(
+                        random,
+                        "temperatura_elevada",
+                        "humedad_elevada"
+                    );
+
+                break;
+
+            case "electrical_instability":
+                currentAlertType =
+                    ElegirValor(
+                        random,
+                        "vibracion_anormal",
+                        "temperatura_elevada"
+                    );
+
+                break;
+
+            case "rack_overheating":
+                currentAlertType =
+                    "temperatura_elevada";
+
+                break;
+
+            case "network_overload":
+                currentAlertType =
+                    "ruido_anormal";
+
+                break;
+
+            case "access_obstruction":
+                currentAlertType =
+                    "obstruccion_detectada";
+
+                break;
+
+            case "multiple_anomalies":
+                currentAlertType =
+                    ElegirValor(
+                        random,
+                        "temperatura_elevada",
+                        "vibracion_anormal",
+                        "ruido_anormal"
+                    );
+
+                break;
+
+            default:
+                // Cuando la operación es normal, se simula
+                // una alerta IoT levemente elevada:
+                // después el robot la descarta como falso positivo.
+                currentAlertType =
+                    ElegirValor(
+                        random,
+                        "temperatura_elevada",
+                        "humedad_elevada",
+                        "ruido_anormal",
+                        "vibracion_anormal"
+                    );
+
+                break;
+        }
+
+        currentAlertThreshold =
+            ObtenerUmbral(
+                currentAlertType
+            );
+
+        if (
+            currentAlertType ==
+            "obstruccion_detectada"
+        )
+        {
+            currentAlertSensorValue =
+                Mathf.Max(
+                    1,
+                    currentObstacleCount
+                );
+        }
+        else
+        {
+            bool isFalsePositive =
+                currentIncidentType ==
+                "normal_operation";
+
+            float excess =
+                CalcularExcesoAlerta(
+                    random,
+                    currentAlertType,
+                    isFalsePositive
+                );
+
+            currentAlertSensorValue =
+                currentAlertThreshold +
+                excess;
+        }
+
+        currentAlertSeverity =
+            CalcularSeveridadAlerta(
+                currentAlertType,
+                currentAlertSensorValue,
+                currentAlertThreshold
+            );
+    }
+
+    private string ElegirValor(
+        System.Random random,
+        params string[] values
+    )
+    {
+        return values[
+            random.Next(
+                0,
+                values.Length
+            )
+        ];
+    }
+
+    private float ObtenerUmbral(
+        string alertType
+    )
+    {
+        switch (alertType)
+        {
+            case "temperatura_elevada":
+                return 32f;
+
+            case "humedad_elevada":
+                return 58f;
+
+            case "ruido_anormal":
+                return 68f;
+
+            case "vibracion_anormal":
+                return 4.5f;
+
+            case "obstruccion_detectada":
+                return 1f;
+
+            default:
+                return 0f;
+        }
+    }
+
+    private float CalcularExcesoAlerta(
+        System.Random random,
+        string alertType,
+        bool isFalsePositive
+    )
+    {
+        if (isFalsePositive)
+        {
+            return RandomEntre(
+                random,
+                0.15f,
+                1.20f
+            );
+        }
+
+        switch (alertType)
+        {
+            case "temperatura_elevada":
+                return RandomEntre(
+                    random,
+                    2.0f,
+                    7.5f
+                );
+
+            case "humedad_elevada":
+                return RandomEntre(
+                    random,
+                    2.0f,
+                    10.0f
+                );
+
+            case "ruido_anormal":
+                return RandomEntre(
+                    random,
+                    2.0f,
+                    12.0f
+                );
+
+            case "vibracion_anormal":
+                return RandomEntre(
+                    random,
+                    0.6f,
+                    3.0f
+                );
+
+            default:
+                return 1f;
+        }
+    }
+
+    private string CalcularSeveridadAlerta(
+        string alertType,
+        float sensorValue,
+        float threshold
+    )
+    {
+        if (
+            alertType ==
+            "obstruccion_detectada"
+        )
+        {
+            return sensorValue >= 4f
+                ? "high"
+                : "medium";
+        }
+
+        float difference =
+            sensorValue -
+            threshold;
+
+        switch (alertType)
+        {
+            case "temperatura_elevada":
+                return difference >= 3f
+                    ? "high"
+                    : "medium";
+
+            case "humedad_elevada":
+                return difference >= 5f
+                    ? "high"
+                    : "medium";
+
+            case "ruido_anormal":
+                return difference >= 6f
+                    ? "high"
+                    : "medium";
+
+            case "vibracion_anormal":
+                return difference >= 1.5f
+                    ? "high"
+                    : "medium";
+
+            default:
+                return "medium";
+        }
+    }
+
+    // =====================================================
+    // CREAR LECTURA
+    // =====================================================
+
     private void RegistrarLectura()
     {
         float elapsedSeconds =
@@ -520,14 +874,14 @@ public class DatasetLogger : MonoBehaviour
                 batteryDrain
             );
 
-        Vector3 planarRobotPosition =
+        Vector3 robotPosition =
             new Vector3(
                 transform.position.x,
                 0f,
                 transform.position.z
             );
 
-        Vector3 planarDestinationPosition =
+        Vector3 destinationPosition =
             new Vector3(
                 currentDestinationPosition.x,
                 0f,
@@ -536,8 +890,8 @@ public class DatasetLogger : MonoBehaviour
 
         float hotspotDistance =
             Vector3.Distance(
-                planarRobotPosition,
-                planarDestinationPosition
+                robotPosition,
+                destinationPosition
             );
 
         float proximity =
@@ -646,6 +1000,10 @@ public class DatasetLogger : MonoBehaviour
         );
     }
 
+    // =====================================================
+    // TELEMETRÍA, SENSORES Y EVENTOS
+    // =====================================================
+
     private void GuardarTelemetria(
         float elapsedSeconds,
         float speed,
@@ -655,6 +1013,7 @@ public class DatasetLogger : MonoBehaviour
         string line = string.Join(
             ",",
             currentMissionId,
+            robotId,
             Formatear(elapsedSeconds),
             Formatear(transform.position.x),
             Formatear(transform.position.y),
@@ -682,6 +1041,7 @@ public class DatasetLogger : MonoBehaviour
         string line = string.Join(
             ",",
             currentMissionId,
+            robotId,
             Formatear(elapsedSeconds),
             currentDestinationName,
             Formatear(hotspotDistance),
@@ -783,6 +1143,66 @@ public class DatasetLogger : MonoBehaviour
         }
     }
 
+    private void RegistrarEvento(
+        string eventType,
+        string severity,
+        float value
+    )
+    {
+        float elapsedSeconds =
+            Time.time -
+            missionStartTime;
+
+        string line = string.Join(
+            ",",
+            currentMissionId,
+            robotId,
+            Formatear(elapsedSeconds),
+            eventType,
+            severity,
+            Formatear(value)
+        );
+
+        File.AppendAllText(
+            eventsPath,
+            line + "\n"
+        );
+
+        eventCount++;
+    }
+
+    // =====================================================
+    // ALERTAS IOT
+    // =====================================================
+
+    private void GuardarAlertaIoT(
+        string validationResult
+    )
+    {
+        string line = string.Join(
+            ",",
+            currentAlertId,
+            currentMissionId,
+            robotId,
+            currentZoneId,
+            currentAlertType,
+            Formatear(currentAlertSensorValue),
+            Formatear(currentAlertThreshold),
+            currentAlertSeverity,
+            "yes",
+            validationResult
+        );
+
+        File.AppendAllText(
+            iotAlertsPath,
+            line + "\n"
+        );
+    }
+
+    // =====================================================
+    // RIESGO
+    // =====================================================
+
     private int CalcularRiskScore(
         bool completed
     )
@@ -800,7 +1220,9 @@ public class DatasetLogger : MonoBehaviour
             score += 1;
         }
 
-        if (currentObstacleCount >= 4)
+        if (
+            currentObstacleCount >= 4
+        )
         {
             score += 1;
         }
@@ -810,12 +1232,16 @@ public class DatasetLogger : MonoBehaviour
             score += 4;
         }
 
-        if (maxTemperature >= 35f)
+        if (
+            maxTemperature >= 35f
+        )
         {
             score += 1;
         }
 
-        if (maxVibration >= 5.3f)
+        if (
+            maxVibration >= 5.3f
+        )
         {
             score += 1;
         }
@@ -823,34 +1249,24 @@ public class DatasetLogger : MonoBehaviour
         return score;
     }
 
-    private void RegistrarEvento(
-        string eventType,
-        string severity,
-        float value
+    // =====================================================
+    // AUXILIARES
+    // =====================================================
+
+    private float RandomEntre(
+        System.Random random,
+        float min,
+        float max
     )
     {
-        float elapsedSeconds =
-            Time.time -
-            missionStartTime;
-
-        string line = string.Join(
-            ",",
-            currentMissionId,
-            Formatear(elapsedSeconds),
-            eventType,
-            severity,
-            Formatear(value)
-        );
-
-        File.AppendAllText(
-            eventsPath,
-            line + "\n"
-        );
-
-        eventCount++;
+        return min +
+            (float) random.NextDouble() *
+            (max - min);
     }
 
-    private string Formatear(float value)
+    private string Formatear(
+        float value
+    )
     {
         return value.ToString(
             "F3",

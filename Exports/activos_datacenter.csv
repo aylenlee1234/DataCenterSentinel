@@ -1,0 +1,14 @@
+asset_id,zone_id,asset_name,asset_type,criticality
+A001,Z01,Network_Cabinet_01,network_cabinet,medium
+A002,Z01,Network_Cabinet_02,network_cabinet,medium
+A003,Z02,Tablero_01,electrical_panel,high
+A004,Z02,Tablero_02,electrical_panel,high
+A005,Z02,Transformador_01,transformer,high
+A006,Z03,CRAC_01,cooling_unit,high
+A007,Z03,CRAC_02,cooling_unit,high
+A008,Z03,CRAC_03,cooling_unit,high
+A009,Z04,UPS_Main,ups,high
+A010,Z04,Battery_Module_01,battery_module,high
+A011,Z04,Battery_Module_02,battery_module,high
+A012,Z05,Racks_Norte,server_rack_group,medium
+A013,Z06,Racks_Sur,server_rack_group,medium
