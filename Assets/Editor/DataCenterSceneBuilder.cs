@@ -23,28 +23,72 @@ public static class DataCenterSceneBuilder
         CrearCarpetaSiNoExiste("Assets", "Materials");
 
         // =====================================================
-        // MATERIALES
+        // MATERIALES GENERALES
         // =====================================================
 
         Material pisoMaterial = CrearMaterial(
             "Piso",
-            new Color(0.12f, 0.16f, 0.22f)
+            new Color(0.10f, 0.14f, 0.20f)
         );
 
         Material paredMaterial = CrearMaterial(
             "Pared",
-            new Color(0.30f, 0.36f, 0.44f)
+            new Color(0.28f, 0.34f, 0.42f)
         );
 
         Material pasilloMaterial = CrearMaterial(
             "Pasillo",
-            new Color(0.20f, 0.26f, 0.34f)
+            new Color(0.18f, 0.23f, 0.31f)
         );
 
-        Material rackMaterial = CrearMaterial(
-            "Rack",
-            new Color(0.08f, 0.34f, 0.62f)
+        Material entradaMaterial = CrearMaterial(
+            "Entrada",
+            new Color(0.18f, 0.78f, 0.42f)
         );
+
+        Material obstaculoMaterial = CrearMaterial(
+            "Obstaculo",
+            new Color(0.82f, 0.22f, 0.16f)
+        );
+
+        Material robotMaterial = CrearMaterial(
+            "RobotPlaceholder",
+            new Color(0.62f, 0.22f, 0.82f)
+        );
+
+        // =====================================================
+        // MATERIALES DE RACKS
+        // =====================================================
+
+        Material rackBaseMaterial = CrearMaterial(
+            "RackBase",
+            new Color(0.06f, 0.09f, 0.13f)
+        );
+
+        Material rackFrameMaterial = CrearMaterial(
+            "RackFrame",
+            new Color(0.03f, 0.05f, 0.08f)
+        );
+
+        Material serverMaterial = CrearMaterial(
+            "ServerUnit",
+            new Color(0.12f, 0.17f, 0.24f)
+        );
+
+        Material ledMaterial = CrearMaterialEmisivo(
+            "RackLed",
+            new Color(0.20f, 1.00f, 0.55f),
+            4f
+        );
+
+        Material bandejaCableadoMaterial = CrearMaterial(
+            "BandejaCableado",
+            new Color(0.13f, 0.16f, 0.21f)
+        );
+
+        // =====================================================
+        // MATERIALES DE ZONAS
+        // =====================================================
 
         Material coolingMaterial = CrearMaterial(
             "Cooling",
@@ -66,19 +110,22 @@ public static class DataCenterSceneBuilder
             new Color(0.28f, 0.72f, 0.32f)
         );
 
-        Material obstaculoMaterial = CrearMaterial(
-            "Obstaculo",
-            new Color(0.82f, 0.22f, 0.16f)
+        Material pasilloFrioMaterial = CrearMaterialEmisivo(
+            "PasilloFrio",
+            new Color(0.08f, 0.42f, 0.88f),
+            1.7f
         );
 
-        Material robotMaterial = CrearMaterial(
-            "RobotPlaceholder",
-            new Color(0.62f, 0.22f, 0.82f)
+        Material pasilloCalienteMaterial = CrearMaterialEmisivo(
+            "PasilloCaliente",
+            new Color(0.88f, 0.20f, 0.12f),
+            1.7f
         );
 
-        Material entradaMaterial = CrearMaterial(
-            "Entrada",
-            new Color(0.18f, 0.78f, 0.42f)
+        Material luzTechoMaterial = CrearMaterialEmisivo(
+            "LuzTecho",
+            new Color(0.90f, 0.96f, 1.00f),
+            2.5f
         );
 
         // =====================================================
@@ -133,7 +180,7 @@ public static class DataCenterSceneBuilder
         );
 
         // =====================================================
-        // PASILLOS
+        // PASILLOS GENERALES
         // =====================================================
 
         CrearCubo(
@@ -141,7 +188,8 @@ public static class DataCenterSceneBuilder
             "Pasillo_Central",
             new Vector3(0f, 0.02f, 0f),
             new Vector3(23f, 0.04f, 1.6f),
-            pasilloMaterial
+            pasilloMaterial,
+            true
         );
 
         CrearCubo(
@@ -149,7 +197,8 @@ public static class DataCenterSceneBuilder
             "Pasillo_Norte",
             new Vector3(0f, 0.02f, 5.4f),
             new Vector3(23f, 0.04f, 1.3f),
-            pasilloMaterial
+            pasilloMaterial,
+            true
         );
 
         CrearCubo(
@@ -157,7 +206,50 @@ public static class DataCenterSceneBuilder
             "Pasillo_Sur",
             new Vector3(0f, 0.02f, -5.4f),
             new Vector3(23f, 0.04f, 1.3f),
-            pasilloMaterial
+            pasilloMaterial,
+            true
+        );
+
+        // =====================================================
+        // PASILLOS FRÍOS Y CALIENTES
+        // =====================================================
+
+        // Frente de racks: líneas azules.
+        CrearCubo(
+            dataCenter.transform,
+            "Linea_Fria_Norte",
+            new Vector3(0f, 0.055f, 4.25f),
+            new Vector3(18.5f, 0.025f, 0.20f),
+            pasilloFrioMaterial,
+            true
+        );
+
+        CrearCubo(
+            dataCenter.transform,
+            "Linea_Fria_Sur",
+            new Vector3(0f, 0.055f, -4.25f),
+            new Vector3(18.5f, 0.025f, 0.20f),
+            pasilloFrioMaterial,
+            true
+        );
+
+        // Parte trasera de racks: líneas rojas.
+        CrearCubo(
+            dataCenter.transform,
+            "Linea_Caliente_Norte",
+            new Vector3(0f, 0.055f, 2.05f),
+            new Vector3(18.5f, 0.025f, 0.20f),
+            pasilloCalienteMaterial,
+            true
+        );
+
+        CrearCubo(
+            dataCenter.transform,
+            "Linea_Caliente_Sur",
+            new Vector3(0f, 0.055f, -2.05f),
+            new Vector3(18.5f, 0.025f, 0.20f),
+            pasilloCalienteMaterial,
+            true
         );
 
         // =====================================================
@@ -169,11 +261,12 @@ public static class DataCenterSceneBuilder
             "Zona_Entrada",
             new Vector3(-11.2f, 0.03f, 0f),
             new Vector3(2f, 0.06f, 2f),
-            entradaMaterial
+            entradaMaterial,
+            true
         );
 
         // =====================================================
-        // RACKS DE SERVIDORES
+        // RACKS REALISTAS
         // =====================================================
 
         float[] posicionesX =
@@ -190,24 +283,56 @@ public static class DataCenterSceneBuilder
 
         foreach (float x in posicionesX)
         {
+            // Fila norte: frente hacia el pasillo frío exterior.
             CrearRack(
                 dataCenter.transform,
                 $"Rack_{numeroRack:00}",
-                new Vector3(x, 1.4f, 3.1f),
-                rackMaterial
+                new Vector3(x, 0f, 3.1f),
+                1f,
+                rackBaseMaterial,
+                rackFrameMaterial,
+                serverMaterial,
+                ledMaterial
             );
 
             numeroRack++;
 
+            // Fila sur: frente hacia el pasillo frío exterior.
             CrearRack(
                 dataCenter.transform,
                 $"Rack_{numeroRack:00}",
-                new Vector3(x, 1.4f, -3.1f),
-                rackMaterial
+                new Vector3(x, 0f, -3.1f),
+                -1f,
+                rackBaseMaterial,
+                rackFrameMaterial,
+                serverMaterial,
+                ledMaterial
             );
 
             numeroRack++;
         }
+
+        // =====================================================
+        // BANDEJAS SUPERIORES DE CABLEADO
+        // =====================================================
+
+        CrearCubo(
+            dataCenter.transform,
+            "Bandeja_Cableado_Norte",
+            new Vector3(0f, 3.80f, 3.1f),
+            new Vector3(19f, 0.16f, 0.35f),
+            bandejaCableadoMaterial,
+            true
+        );
+
+        CrearCubo(
+            dataCenter.transform,
+            "Bandeja_Cableado_Sur",
+            new Vector3(0f, 3.80f, -3.1f),
+            new Vector3(19f, 0.16f, 0.35f),
+            bandejaCableadoMaterial,
+            true
+        );
 
         // =====================================================
         // SALA DE REFRIGERACIÓN
@@ -402,16 +527,38 @@ public static class DataCenterSceneBuilder
         NavMeshSurface surface =
             navigation.AddComponent<NavMeshSurface>();
 
-        // El NavMesh solamente considera objetos de la capa Default.
-        // De esta forma, ignora los carteles 3D creados más abajo.
+        // Solo los objetos Default participan del cálculo.
         surface.layerMask =
             LayerMask.GetMask("Default");
 
         surface.BuildNavMesh();
 
         // =====================================================
+        // LUCES DE TECHO
+        // =====================================================
+
+        float[] posicionesLuces =
+        {
+            -10f,
+            -6f,
+            -2f,
+            2f,
+            6f,
+            10f
+        };
+
+        foreach (float x in posicionesLuces)
+        {
+            CrearLuzTecho(
+                dataCenter.transform,
+                $"Luz_Techo_{x}",
+                new Vector3(x, 4.7f, 0f),
+                luzTechoMaterial
+            );
+        }
+
+        // =====================================================
         // CARTELES FLOTANTES 3D
-        // Se crean DESPUÉS del NavMesh para evitar errores de TMP.
         // =====================================================
 
         CrearEtiqueta3D(
@@ -456,7 +603,7 @@ public static class DataCenterSceneBuilder
 
         CrearEtiqueta3D(
             dataCenter.transform,
-            "LabCrearEtiel_RacksNorte",
+            "Label_RacksNorte",
             "RACKS NORTE",
             new Vector3(1f, 3.4f, 3.1f),
             new Color(0.55f, 0.80f, 1f)
@@ -509,29 +656,288 @@ public static class DataCenterSceneBuilder
             robot;
 
         Debug.Log(
-            "Data center completo generado correctamente."
+            "Data center realista generado correctamente."
         );
     }
 
     // =====================================================
-    // MÉTODOS AUXILIARES
+    // RACK REALISTA
     // =====================================================
 
     private static void CrearRack(
         Transform parent,
         string nombre,
         Vector3 posicion,
-        Material material
+        float direccionFrenteZ,
+        Material baseMaterial,
+        Material frameMaterial,
+        Material serverMaterial,
+        Material ledMaterial
     )
     {
+        GameObject rack =
+            new GameObject(nombre);
+
+        rack.transform.SetParent(parent);
+        rack.transform.position = posicion;
+
+        // Base inferior.
         CrearCubo(
-            parent,
-            nombre,
-            posicion,
-            new Vector3(1.2f, 2.8f, 1.5f),
-            material
+            rack.transform,
+            "Base",
+            posicion + new Vector3(0f, 0.10f, 0f),
+            new Vector3(1.30f, 0.20f, 1.55f),
+            baseMaterial
+        );
+
+        // Columnas del marco.
+        Vector3[] columnas =
+        {
+            new Vector3(-0.58f, 1.55f, -0.68f),
+            new Vector3( 0.58f, 1.55f, -0.68f),
+            new Vector3(-0.58f, 1.55f,  0.68f),
+            new Vector3( 0.58f, 1.55f,  0.68f)
+        };
+
+        foreach (Vector3 offset in columnas)
+        {
+            CrearCubo(
+                rack.transform,
+                "FramePost",
+                posicion + offset,
+                new Vector3(0.10f, 2.90f, 0.10f),
+                frameMaterial
+            );
+        }
+
+        // Techo y parte inferior del marco.
+        CrearCubo(
+            rack.transform,
+            "FrameTop",
+            posicion + new Vector3(0f, 3.00f, 0f),
+            new Vector3(1.30f, 0.12f, 1.55f),
+            frameMaterial
+        );
+
+        CrearCubo(
+            rack.transform,
+            "FrameBottom",
+            posicion + new Vector3(0f, 0.20f, 0f),
+            new Vector3(1.30f, 0.12f, 1.55f),
+            frameMaterial
+        );
+
+        // Servidores horizontales y LEDs.
+        for (int index = 0; index < 8; index++)
+        {
+            float y =
+                0.45f +
+                index * 0.30f;
+
+            float servidorZ =
+                0.72f *
+                direccionFrenteZ;
+
+            float ledZ =
+                0.795f *
+                direccionFrenteZ;
+
+            CrearCubo(
+                rack.transform,
+                $"Server_{index + 1:00}",
+                posicion +
+                new Vector3(0f, y, servidorZ),
+                new Vector3(1.08f, 0.20f, 0.12f),
+                serverMaterial
+            );
+
+            CrearCubo(
+                rack.transform,
+                $"Led_{index + 1:00}",
+                posicion +
+                new Vector3(0.42f, y, ledZ),
+                new Vector3(0.08f, 0.055f, 0.025f),
+                ledMaterial,
+                true
+            );
+        }
+
+        // Paneles laterales.
+        CrearCubo(
+            rack.transform,
+            "SidePanel_Left",
+            posicion + new Vector3(-0.63f, 1.55f, 0f),
+            new Vector3(0.06f, 2.75f, 1.40f),
+            frameMaterial
+        );
+
+        CrearCubo(
+            rack.transform,
+            "SidePanel_Right",
+            posicion + new Vector3(0.63f, 1.55f, 0f),
+            new Vector3(0.06f, 2.75f, 1.40f),
+            frameMaterial
         );
     }
+
+    // =====================================================
+    // LUCES
+    // =====================================================
+
+    private static void CrearLuzTecho(
+        Transform parent,
+        string nombre,
+        Vector3 posicion,
+        Material panelMaterial
+    )
+    {
+        // Panel luminoso visible.
+        CrearCubo(
+            parent,
+            nombre + "_Panel",
+            posicion,
+            new Vector3(2.20f, 0.10f, 0.42f),
+            panelMaterial,
+            true
+        );
+
+        // Luz real que ilumina la escena.
+        GameObject lightObject =
+            new GameObject(
+                nombre + "_Light"
+            );
+
+        lightObject.transform.SetParent(
+            parent
+        );
+
+        lightObject.transform.position =
+            posicion +
+            new Vector3(0f, -0.20f, 0f);
+
+        Light lightComponent =
+            lightObject.AddComponent<Light>();
+
+        lightComponent.type =
+            LightType.Point;
+
+        lightComponent.color =
+            new Color(
+                0.90f,
+                0.96f,
+                1.00f
+            );
+
+        lightComponent.intensity =
+            2.8f;
+
+        lightComponent.range =
+            7f;
+
+        lightComponent.shadows =
+            LightShadows.None;
+    }
+
+    // =====================================================
+    // ETIQUETAS 3D
+    // =====================================================
+
+    private static void CrearEtiqueta3D(
+        Transform parent,
+        string objectName,
+        string labelText,
+        Vector3 position,
+        Color color
+    )
+    {
+        GameObject labelObject =
+            new GameObject(objectName);
+
+        // Impide que los textos interfieran con el NavMesh.
+        int ignoreRaycastLayer =
+            LayerMask.NameToLayer(
+                "Ignore Raycast"
+            );
+
+        if (ignoreRaycastLayer >= 0)
+        {
+            labelObject.layer =
+                ignoreRaycastLayer;
+        }
+
+        labelObject.transform.SetParent(
+            parent
+        );
+
+        labelObject.transform.position =
+            position;
+
+        TextMeshPro textComponent =
+            labelObject.AddComponent<TextMeshPro>();
+
+        TMP_FontAsset fontAsset =
+            AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+                "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset"
+            );
+
+        if (fontAsset == null)
+        {
+            fontAsset =
+                TMP_Settings.defaultFontAsset;
+        }
+
+        if (fontAsset == null)
+        {
+            Debug.LogError(
+                "No se encontró LiberationSans SDF. " +
+                "Importá TMP Essential Resources desde " +
+                "Window → TextMeshPro."
+            );
+
+            Object.DestroyImmediate(
+                labelObject
+            );
+
+            return;
+        }
+
+        textComponent.font =
+            fontAsset;
+
+        textComponent.text =
+            labelText;
+
+        textComponent.fontSize =
+            7f;
+
+        textComponent.color =
+            color;
+
+        textComponent.alignment =
+            TextAlignmentOptions.Center;
+
+        textComponent.textWrappingMode =
+            TextWrappingModes.NoWrap;
+
+        textComponent.fontStyle =
+            FontStyles.Bold;
+
+        textComponent.rectTransform.sizeDelta =
+            new Vector2(30f, 6f);
+
+        labelObject.transform.localScale =
+            Vector3.one * 0.60f;
+
+        labelObject.AddComponent<
+            BillboardLabel
+        >();
+
+        textComponent.ForceMeshUpdate();
+    }
+
+    // =====================================================
+    // ZONAS Y EQUIPOS
+    // =====================================================
 
     private static void CrearZonaPiso(
         Transform parent,
@@ -546,7 +952,8 @@ public static class DataCenterSceneBuilder
             nombre,
             posicion,
             escala,
-            material
+            material,
+            true
         );
     }
 
@@ -567,12 +974,17 @@ public static class DataCenterSceneBuilder
         );
     }
 
+    // =====================================================
+    // CUBOS AUXILIARES
+    // =====================================================
+
     private static GameObject CrearCubo(
         Transform parent,
         string nombre,
         Vector3 posicion,
         Vector3 escala,
-        Material material
+        Material material,
+        bool eliminarCollider = false
     )
     {
         GameObject cubo =
@@ -581,92 +993,41 @@ public static class DataCenterSceneBuilder
             );
 
         cubo.name = nombre;
-        cubo.transform.SetParent(parent);
-        cubo.transform.position = posicion;
-        cubo.transform.localScale = escala;
+
+        cubo.transform.SetParent(
+            parent
+        );
+
+        cubo.transform.position =
+            posicion;
+
+        cubo.transform.localScale =
+            escala;
 
         cubo
             .GetComponent<Renderer>()
-            .sharedMaterial = material;
+            .sharedMaterial =
+            material;
+
+        if (eliminarCollider)
+        {
+            Collider collider =
+                cubo.GetComponent<Collider>();
+
+            if (collider != null)
+            {
+                Object.DestroyImmediate(
+                    collider
+                );
+            }
+        }
 
         return cubo;
     }
 
-    private static void CrearEtiqueta3D(
-    Transform parent,
-    string objectName,
-    string labelText,
-    Vector3 position,
-    Color color
-)
-{
-    GameObject labelObject =
-        new GameObject(objectName);
-
-    // Evita que los carteles interfieran con el NavMesh.
-    int ignoreRaycastLayer =
-        LayerMask.NameToLayer("Ignore Raycast");
-
-    if (ignoreRaycastLayer >= 0)
-    {
-        labelObject.layer =
-            ignoreRaycastLayer;
-    }
-
-    labelObject.transform.SetParent(parent);
-    labelObject.transform.position = position;
-
-    TextMeshPro textComponent =
-        labelObject.AddComponent<TextMeshPro>();
-
-    // Carga explícitamente la fuente importada de TextMesh Pro.
-    TMP_FontAsset fontAsset =
-        AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
-            "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset"
-        );
-
-    // Respaldo por si la ruta cambia.
-    if (fontAsset == null)
-    {
-        fontAsset =
-            TMP_Settings.defaultFontAsset;
-    }
-
-    if (fontAsset == null)
-    {
-        Debug.LogError(
-            "No se encontró LiberationSans SDF. " +
-            "Importá TMP Essential Resources desde Window → TextMeshPro."
-        );
-
-        Object.DestroyImmediate(labelObject);
-        return;
-    }
-
-    textComponent.font = fontAsset;
-    textComponent.text = labelText;
-    textComponent.fontSize = 7f;
-    textComponent.color = color;
-
-    textComponent.alignment =
-        TextAlignmentOptions.Center;
-
-    textComponent.textWrappingMode =
-        TextWrappingModes.NoWrap;
-
-    textComponent.fontStyle =
-        FontStyles.Bold;
-
-    textComponent.rectTransform.sizeDelta =
-        new Vector2(30f, 6f);
-
-    labelObject.transform.localScale =
-        Vector3.one * 0.60f;
-
-    labelObject.AddComponent<BillboardLabel>();
-
-    textComponent.ForceMeshUpdate();
-}
+    // =====================================================
+    // CARPETAS
+    // =====================================================
 
     private static void CrearCarpetaSiNoExiste(
         string carpetaPadre,
@@ -688,6 +1049,10 @@ public static class DataCenterSceneBuilder
             );
         }
     }
+
+    // =====================================================
+    // MATERIALES
+    // =====================================================
 
     private static Material CrearMaterial(
         string nombre,
@@ -728,6 +1093,74 @@ public static class DataCenterSceneBuilder
 
         material.color =
             color;
+
+        EditorUtility.SetDirty(
+            material
+        );
+
+        return material;
+    }
+
+    private static Material CrearMaterialEmisivo(
+        string nombre,
+        Color color,
+        float intensidad
+    )
+    {
+        string ruta =
+            $"Assets/Materials/{nombre}.mat";
+
+        Material material =
+            AssetDatabase.LoadAssetAtPath<
+                Material
+            >(
+                ruta
+            );
+
+        if (material == null)
+        {
+            Shader shader =
+                Shader.Find(
+                    "Universal Render Pipeline/Lit"
+                );
+
+            if (shader == null)
+            {
+                shader =
+                    Shader.Find("Standard");
+            }
+
+            material =
+                new Material(shader);
+
+            AssetDatabase.CreateAsset(
+                material,
+                ruta
+            );
+        }
+
+        material.color =
+            color;
+
+        material.EnableKeyword(
+            "_EMISSION"
+        );
+
+        if (
+            material.HasProperty(
+                "_EmissionColor"
+            )
+        )
+        {
+            material.SetColor(
+                "_EmissionColor",
+                color * intensidad
+            );
+        }
+
+        material.globalIlluminationFlags =
+            MaterialGlobalIlluminationFlags
+                .RealtimeEmissive;
 
         EditorUtility.SetDirty(
             material

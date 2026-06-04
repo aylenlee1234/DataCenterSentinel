@@ -1,6 +1,9 @@
 mission_id,destination,zone_type,zone_criticality,incident_type_ground_truth,obstacle_count,duration_seconds,completed,battery_initial_pct,battery_final_pct,max_temperature_c,max_humidity_pct,max_noise_db,max_vibration,event_count,requires_intervention,risk_level
-M0001,Sala Red,network,medium,multiple_anomalies,1,1.328,yes,100.000,99.877,36.162,63.228,73.023,7.108,6,yes,high
-M0002,Sala Energia,electrical,high,multiple_anomalies,2,1.525,yes,100.000,99.830,35.970,61.778,71.206,6.868,6,yes,high
-M0003,Sala Cooling,cooling,high,multiple_anomalies,5,6.556,yes,100.000,99.352,38.339,65.209,75.961,7.757,6,yes,high
-M0004,Sala UPS,power_backup,high,normal_operation,5,5.930,yes,100.000,99.431,32.023,57.950,68.337,4.519,5,no,low
-M0005,Rack Norte,server_rack,medium,normal_operation,2,5.595,yes,100.000,99.600,29.031,53.590,63.388,3.719,2,no,low
+M0001,Sala Red,network,medium,multiple_anomalies,1,1.333,yes,100.000,99.876,35.637,62.616,73.256,6.975,6,yes,high
+M0002,Sala Energia,electrical,high,multiple_anomalies,2,1.534,yes,100.000,99.830,35.632,62.080,71.766,6.533,6,yes,high
+M0003,Sala Cooling,cooling,high,multiple_anomalies,5,7.031,yes,100.000,99.327,37.759,63.851,76.426,7.884,6,yes,high
+M0004,Sala UPS,power_backup,high,normal_operation,5,5.928,yes,100.000,99.431,31.948,56.250,64.390,4.670,3,no,low
+M0005,Rack Norte,server_rack,medium,normal_operation,2,5.436,yes,100.000,99.570,29.070,53.254,59.115,3.333,2,no,low
+M0006,Rack Sur,server_rack,medium,normal_operation,2,5.716,yes,100.000,99.536,28.688,51.495,62.281,3.100,2,no,low
+M0007,Sala Red,network,medium,normal_operation,3,1.328,yes,100.000,99.865,31.743,56.718,67.513,4.566,3,no,low
+M0008,Sala Energia,electrical,high,electrical_instability,4,1.534,yes,100.000,99.815,33.812,56.830,69.423,6.510,5,yes,high
