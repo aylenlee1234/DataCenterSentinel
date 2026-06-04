@@ -3,12 +3,17 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
+using TMPro;
 
 public static class DataCenterSceneBuilder
 {
     [MenuItem("Tools/DataCenter Sentinel/Generar data center completo")]
     public static void GenerarEscenario()
     {
+        // =====================================================
+        // ESCENA NUEVA
+        // =====================================================
+
         var scene = EditorSceneManager.NewScene(
             NewSceneSetup.DefaultGameObjects,
             NewSceneMode.Single
@@ -17,9 +22,9 @@ public static class DataCenterSceneBuilder
         CrearCarpetaSiNoExiste("Assets", "Scenes");
         CrearCarpetaSiNoExiste("Assets", "Materials");
 
-        // ==========================
+        // =====================================================
         // MATERIALES
-        // ==========================
+        // =====================================================
 
         Material pisoMaterial = CrearMaterial(
             "Piso",
@@ -76,16 +81,16 @@ public static class DataCenterSceneBuilder
             new Color(0.18f, 0.78f, 0.42f)
         );
 
-        // ==========================
+        // =====================================================
         // CONTENEDOR PRINCIPAL
-        // ==========================
+        // =====================================================
 
         GameObject dataCenter =
             new GameObject("DataCenter");
 
-        // ==========================
+        // =====================================================
         // PISO Y PAREDES
-        // ==========================
+        // =====================================================
 
         CrearCubo(
             dataCenter.transform,
@@ -127,7 +132,10 @@ public static class DataCenterSceneBuilder
             paredMaterial
         );
 
-        // Pasillo central horizontal
+        // =====================================================
+        // PASILLOS
+        // =====================================================
+
         CrearCubo(
             dataCenter.transform,
             "Pasillo_Central",
@@ -136,7 +144,6 @@ public static class DataCenterSceneBuilder
             pasilloMaterial
         );
 
-        // Pasillos laterales
         CrearCubo(
             dataCenter.transform,
             "Pasillo_Norte",
@@ -153,9 +160,9 @@ public static class DataCenterSceneBuilder
             pasilloMaterial
         );
 
-        // ==========================
+        // =====================================================
         // ENTRADA
-        // ==========================
+        // =====================================================
 
         CrearCubo(
             dataCenter.transform,
@@ -165,9 +172,9 @@ public static class DataCenterSceneBuilder
             entradaMaterial
         );
 
-        // ==========================
+        // =====================================================
         // RACKS DE SERVIDORES
-        // ==========================
+        // =====================================================
 
         float[] posicionesX =
         {
@@ -202,9 +209,9 @@ public static class DataCenterSceneBuilder
             numeroRack++;
         }
 
-        // ==========================
+        // =====================================================
         // SALA DE REFRIGERACIÓN
-        // ==========================
+        // =====================================================
 
         CrearZonaPiso(
             dataCenter.transform,
@@ -230,9 +237,9 @@ public static class DataCenterSceneBuilder
             coolingMaterial
         );
 
-        // ==========================
+        // =====================================================
         // SALA UPS
-        // ==========================
+        // =====================================================
 
         CrearZonaPiso(
             dataCenter.transform,
@@ -258,9 +265,9 @@ public static class DataCenterSceneBuilder
             upsMaterial
         );
 
-        // ==========================
+        // =====================================================
         // SALA DE ENERGÍA
-        // ==========================
+        // =====================================================
 
         CrearZonaPiso(
             dataCenter.transform,
@@ -286,9 +293,9 @@ public static class DataCenterSceneBuilder
             energiaMaterial
         );
 
-        // ==========================
+        // =====================================================
         // SALA DE RED
-        // ==========================
+        // =====================================================
 
         CrearZonaPiso(
             dataCenter.transform,
@@ -314,9 +321,9 @@ public static class DataCenterSceneBuilder
             redMaterial
         );
 
-        // ==========================
+        // =====================================================
         // OBSTÁCULOS FIJOS
-        // ==========================
+        // =====================================================
 
         CrearCubo(
             dataCenter.transform,
@@ -334,9 +341,9 @@ public static class DataCenterSceneBuilder
             obstaculoMaterial
         );
 
-        // ==========================
+        // =====================================================
         // ROBOT PROVISIONAL
-        // ==========================
+        // =====================================================
 
         GameObject robot =
             new GameObject("UnitreeGo2_Placeholder");
@@ -351,6 +358,7 @@ public static class DataCenterSceneBuilder
 
         visual.name = "Visual";
         visual.transform.SetParent(robot.transform);
+
         visual.transform.localPosition =
             new Vector3(0f, 0.5f, 0f);
 
@@ -365,9 +373,9 @@ public static class DataCenterSceneBuilder
             visual.GetComponent<Collider>()
         );
 
-        // ==========================
+        // =====================================================
         // COMPONENTES DEL ROBOT
-        // ==========================
+        // =====================================================
 
         NavMeshAgent agent =
             robot.AddComponent<NavMeshAgent>();
@@ -384,9 +392,9 @@ public static class DataCenterSceneBuilder
         robot.AddComponent<DatasetLogger>();
         robot.AddComponent<MissionManager>();
 
-        // ==========================
+        // =====================================================
         // NAVEGACIÓN
-        // ==========================
+        // =====================================================
 
         GameObject navigation =
             new GameObject("Navigation");
@@ -394,11 +402,85 @@ public static class DataCenterSceneBuilder
         NavMeshSurface surface =
             navigation.AddComponent<NavMeshSurface>();
 
+        // El NavMesh solamente considera objetos de la capa Default.
+        // De esta forma, ignora los carteles 3D creados más abajo.
+        surface.layerMask =
+            LayerMask.GetMask("Default");
+
         surface.BuildNavMesh();
 
-        // ==========================
+        // =====================================================
+        // CARTELES FLOTANTES 3D
+        // Se crean DESPUÉS del NavMesh para evitar errores de TMP.
+        // =====================================================
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_Entrada",
+            "ENTRADA",
+            new Vector3(-11.2f, 2.0f, 0f),
+            Color.white
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_SalaRed",
+            "SALA DE RED",
+            new Vector3(-9.5f, 2.8f, 5.8f),
+            new Color(0.55f, 1f, 0.60f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_SalaEnergia",
+            "SALA DE ENERGIA",
+            new Vector3(-9.5f, 2.8f, -5.8f),
+            new Color(1f, 0.55f, 0.45f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_SalaCooling",
+            "SALA COOLING",
+            new Vector3(10.1f, 2.8f, 5.8f),
+            new Color(0.45f, 0.95f, 1f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_SalaUPS",
+            "SALA UPS",
+            new Vector3(10.1f, 2.8f, -5.8f),
+            new Color(1f, 0.85f, 0.35f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "LabCrearEtiel_RacksNorte",
+            "RACKS NORTE",
+            new Vector3(1f, 3.4f, 3.1f),
+            new Color(0.55f, 0.80f, 1f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_RacksSur",
+            "RACKS SUR",
+            new Vector3(1f, 3.4f, -3.1f),
+            new Color(0.55f, 0.80f, 1f)
+        );
+
+        CrearEtiqueta3D(
+            dataCenter.transform,
+            "Label_PasilloTecnico",
+            "PASILLO TECNICO",
+            new Vector3(0f, 1.0f, 0f),
+            new Color(0.80f, 0.85f, 0.95f)
+        );
+
+        // =====================================================
         // CÁMARA
-        // ==========================
+        // =====================================================
 
         Camera camera = Camera.main;
 
@@ -412,9 +494,9 @@ public static class DataCenterSceneBuilder
             );
         }
 
-        // ==========================
+        // =====================================================
         // GUARDAR ESCENA
-        // ==========================
+        // =====================================================
 
         AssetDatabase.SaveAssets();
 
@@ -431,9 +513,9 @@ public static class DataCenterSceneBuilder
         );
     }
 
-    // ==========================
+    // =====================================================
     // MÉTODOS AUXILIARES
-    // ==========================
+    // =====================================================
 
     private static void CrearRack(
         Transform parent,
@@ -510,6 +592,82 @@ public static class DataCenterSceneBuilder
         return cubo;
     }
 
+    private static void CrearEtiqueta3D(
+    Transform parent,
+    string objectName,
+    string labelText,
+    Vector3 position,
+    Color color
+)
+{
+    GameObject labelObject =
+        new GameObject(objectName);
+
+    // Evita que los carteles interfieran con el NavMesh.
+    int ignoreRaycastLayer =
+        LayerMask.NameToLayer("Ignore Raycast");
+
+    if (ignoreRaycastLayer >= 0)
+    {
+        labelObject.layer =
+            ignoreRaycastLayer;
+    }
+
+    labelObject.transform.SetParent(parent);
+    labelObject.transform.position = position;
+
+    TextMeshPro textComponent =
+        labelObject.AddComponent<TextMeshPro>();
+
+    // Carga explícitamente la fuente importada de TextMesh Pro.
+    TMP_FontAsset fontAsset =
+        AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+            "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset"
+        );
+
+    // Respaldo por si la ruta cambia.
+    if (fontAsset == null)
+    {
+        fontAsset =
+            TMP_Settings.defaultFontAsset;
+    }
+
+    if (fontAsset == null)
+    {
+        Debug.LogError(
+            "No se encontró LiberationSans SDF. " +
+            "Importá TMP Essential Resources desde Window → TextMeshPro."
+        );
+
+        Object.DestroyImmediate(labelObject);
+        return;
+    }
+
+    textComponent.font = fontAsset;
+    textComponent.text = labelText;
+    textComponent.fontSize = 7f;
+    textComponent.color = color;
+
+    textComponent.alignment =
+        TextAlignmentOptions.Center;
+
+    textComponent.textWrappingMode =
+        TextWrappingModes.NoWrap;
+
+    textComponent.fontStyle =
+        FontStyles.Bold;
+
+    textComponent.rectTransform.sizeDelta =
+        new Vector2(30f, 6f);
+
+    labelObject.transform.localScale =
+        Vector3.one * 0.60f;
+
+    labelObject.AddComponent<BillboardLabel>();
+
+    textComponent.ForceMeshUpdate();
+}
+
     private static void CrearCarpetaSiNoExiste(
         string carpetaPadre,
         string nuevaCarpeta
@@ -518,7 +676,11 @@ public static class DataCenterSceneBuilder
         string ruta =
             $"{carpetaPadre}/{nuevaCarpeta}";
 
-        if (!AssetDatabase.IsValidFolder(ruta))
+        if (
+            !AssetDatabase.IsValidFolder(
+                ruta
+            )
+        )
         {
             AssetDatabase.CreateFolder(
                 carpetaPadre,
@@ -536,7 +698,9 @@ public static class DataCenterSceneBuilder
             $"Assets/Materials/{nombre}.mat";
 
         Material material =
-            AssetDatabase.LoadAssetAtPath<Material>(
+            AssetDatabase.LoadAssetAtPath<
+                Material
+            >(
                 ruta
             );
 
@@ -562,7 +726,8 @@ public static class DataCenterSceneBuilder
             );
         }
 
-        material.color = color;
+        material.color =
+            color;
 
         EditorUtility.SetDirty(
             material
